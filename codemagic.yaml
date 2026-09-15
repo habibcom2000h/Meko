@@ -1,27 +1,22 @@
 workflows:
-  meko-android:
-    name: Meko Android
-    instance_type: linux_x2
+  android-workflow:
+    name: Meko Android Build
     max_build_duration: 60
-
+    instance_type: linux_x2
     environment:
       flutter: stable
       java: 17
-
     scripts:
-      - name: Check project
+      - name: Generate Android platform files if needed
         script: |
-          pwd
-          ls -la
-          test -f pubspec.yaml
-
-      - name: Get Flutter packages
-        script: |
-          flutter pub get
-
-      - name: Build Android APK
-        script: |
-          flutter build apk --release
-
+          if [ ! -f android/app/build.gradle ] && [ ! -f android/app/build.gradle.kts ]; then
+            flutter create --org com.meko --project-name meko .
+          fi
+      - name: Get packages
+        script: flutter pub get
+      - name: Analyze
+        script: flutter analyze
+      - name: Build APK
+        script: flutter build apk --release
     artifacts:
-      - build/app/outputs/flutter-apk/app-release.apk
+      - build/app/outputs/flutter-apk/*.apk
