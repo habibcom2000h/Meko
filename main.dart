@@ -15,15 +15,11 @@ class MekoApp extends StatelessWidget {
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Meko'),
-          centerTitle: true,
         ),
         body: const Center(
           child: Text(
-            'مرحبًا بك في Meko 🎙️',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-            ),
+            'مرحباً بك في Meko',
+            style: TextStyle(fontSize: 24),
           ),
         ),
       ),
