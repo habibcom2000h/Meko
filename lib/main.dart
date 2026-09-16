@@ -137,19 +137,16 @@ class _MekoHomeState extends State<MekoHome> {
                 Container(
                   width: 48,
                   height: 48,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       colors: [
                         Color(0xFF7C4DFF),
                         Color(0xFFE040FB),
                       ],
                     ),
                   ),
-                  child: const Icon(
-                    Icons.person_rounded,
-                    size: 27,
-                  ),
+                  child: const Icon(Icons.person_rounded, size: 27),
                 ),
                 const SizedBox(width: 12),
                 const Expanded(
@@ -197,66 +194,43 @@ class _MekoHomeState extends State<MekoHome> {
                     Color(0xFFE040FB),
                   ],
                 ),
-                boxShadow: const [
-                  BoxShadow(
-                    blurRadius: 25,
-                    offset: Offset(0, 10),
-                    color: Color(0x55000000),
-                  ),
-                ],
               ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    right: -35,
-                    top: -45,
-                    child: Container(
-                      width: 150,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.08),
+              child: Padding(
+                padding: const EdgeInsets.all(22),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '🎙️ عالمك الصوتي',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(22),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '🎙️ عالمك الصوتي',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'ادخل، تكلم،\nوخلي صوتك يوصل',
-                          style: TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w800,
-                            height: 1.1,
-                          ),
-                        ),
-                        const Spacer(),
-                        FilledButton(
-                          onPressed: () {
-                            setState(() {
-                              currentIndex = 1;
-                            });
-                          },
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF5E35B1),
-                          ),
-                          child: const Text('اكتشف الغرف'),
-                        ),
-                      ],
+                    const SizedBox(height: 8),
+                    const Text(
+                      'ادخل، تكلم،\nوخلي صوتك يوصل',
+                      style: TextStyle(
+                        fontSize: 25,
+                        fontWeight: FontWeight.w800,
+                        height: 1.1,
+                      ),
                     ),
-                  ),
-                ],
+                    const Spacer(),
+                    FilledButton(
+                      onPressed: () {
+                        setState(() {
+                          currentIndex = 1;
+                        });
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF5E35B1),
+                      ),
+                      child: const Text('اكتشف الغرف'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -264,24 +238,12 @@ class _MekoHomeState extends State<MekoHome> {
         const SliverToBoxAdapter(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: [
-                Text(
-                  '🔥 الغرف النشطة',
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Spacer(),
-                Text(
-                  'عرض الكل',
-                  style: TextStyle(
-                    color: Color(0xFFB388FF),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+            child: Text(
+              '🔥 الغرف النشطة',
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -317,142 +279,85 @@ class _MekoHomeState extends State<MekoHome> {
             color: roomColor.withOpacity(0.22),
           ),
         ),
-        child: Column(
+        child: Row(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 58,
-                  height: 58,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    gradient: LinearGradient(
-                      colors: [
-                        roomColor,
-                        roomColor.withOpacity(0.45),
-                      ],
+            Container(
+              width: 62,
+              height: 62,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(19),
+                gradient: LinearGradient(
+                  colors: [
+                    roomColor,
+                    roomColor.withOpacity(0.45),
+                  ],
+                ),
+              ),
+              child: Icon(
+                room['icon'] as IconData,
+                size: 30,
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    room['title'] as String,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  child: Icon(
-                    room['icon'] as IconData,
-                    size: 29,
+                  const SizedBox(height: 5),
+                  Text(
+                    room['subtitle'] as String,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.white54,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 8),
+                  Row(
                     children: [
+                      const Icon(
+                        Icons.people_alt_rounded,
+                        size: 15,
+                        color: Colors.white54,
+                      ),
+                      const SizedBox(width: 5),
                       Text(
-                        room['title'] as String,
+                        '${room['people']} موجود',
                         style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                          color: Colors.white54,
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      const SizedBox(width: 12),
+                      const Icon(
+                        Icons.mic_rounded,
+                        size: 15,
+                        color: Colors.white54,
+                      ),
+                      const SizedBox(width: 5),
                       Text(
-                        room['subtitle'] as String,
+                        '${room['speakers']} متحدث',
                         style: const TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: Colors.white54,
                         ),
                       ),
                     ],
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.greenAccent,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Text(
-                        '${room['people']}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-            const SizedBox(height: 15),
-            Row(
-              children: [
-                SizedBox(
-                  width: 110,
-                  height: 30,
-                  child: Stack(
-                    children: [
-                      _avatar(0, 'A'),
-                      _avatar(26, 'M'),
-                      _avatar(52, 'S'),
-                      _avatar(78, '+'),
-                    ],
-                  ),
-                ),
-                const Spacer(),
-                Text(
-                  '${room['speakers']} متحدثين',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.white54,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                const Icon(
-                  Icons.mic_rounded,
-                  size: 16,
-                  color: Colors.white54,
-                ),
-              ],
+            const Icon(
+              Icons.chevron_left_rounded,
+              color: Colors.white38,
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _avatar(double left, String letter) {
-    return Positioned(
-      left: left,
-      top: 0,
-      child: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: const Color(0xFF292C44),
-          border: Border.all(
-            color: const Color(0xFF111326),
-            width: 2,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            letter,
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
         ),
       ),
     );
@@ -522,9 +427,6 @@ class _MekoHomeState extends State<MekoHome> {
       decoration: BoxDecoration(
         color: const Color(0xFF14172A),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: const Color(0xFF272A40),
-        ),
       ),
       child: Text(text),
     );
@@ -540,20 +442,14 @@ class _MekoHomeState extends State<MekoHome> {
             Container(
               width: 105,
               height: 105,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: const LinearGradient(
+                gradient: LinearGradient(
                   colors: [
                     Color(0xFF7C4DFF),
                     Color(0xFFE040FB),
                   ],
                 ),
-                boxShadow: const [
-                  BoxShadow(
-                    blurRadius: 35,
-                    color: Color(0x557C4DFF),
-                  ),
-                ],
               ),
               child: const Icon(
                 Icons.mic_rounded,
@@ -606,7 +502,7 @@ class _MekoHomeState extends State<MekoHome> {
           backgroundColor: const Color(0xFF15182B),
           title: const Text('غرفة جديدة 🎙️'),
           content: const Text(
-            'هذه الواجهة جاهزة، وسنربط إنشاء الغرفة الحقيقي في المرحلة القادمة.',
+            'إنشاء الغرفة الحقيقي سنربطه بالسيرفر في المرحلة القادمة.',
           ),
           actions: [
             TextButton(
@@ -708,9 +604,9 @@ class _MekoHomeState extends State<MekoHome> {
           child: Container(
             width: 100,
             height: 100,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
+              gradient: LinearGradient(
                 colors: [
                   Color(0xFF7C4DFF),
                   Color(0xFFE040FB),
@@ -801,110 +697,366 @@ class _MekoHomeState extends State<MekoHome> {
   }
 
   void _openRoom(Map<String, dynamic> room) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: const Color(0xFF101225),
-      builder: (context) {
-        return SizedBox(
-          height: MediaQuery.of(context).size.height * 0.72,
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              children: [
-                Container(
-                  width: 45,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.white24,
-                    borderRadius: BorderRadius.circular(10),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VoiceRoomPage(room: room),
+      ),
+    );
+  }
+}
+
+class VoiceRoomPage extends StatefulWidget {
+  final Map<String, dynamic> room;
+
+  const VoiceRoomPage({
+    super.key,
+    required this.room,
+  });
+
+  @override
+  State<VoiceRoomPage> createState() => _VoiceRoomPageState();
+}
+
+class _VoiceRoomPageState extends State<VoiceRoomPage> {
+  bool micOn = false;
+  int likes = 126;
+
+  final List<String> messages = [
+    'أهلًا بالجميع 👋',
+    'شو الأخبار؟ ❤️',
+    'أجواء حلوة اليوم 🔥',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final Color roomColor = widget.room['color'] as Color;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF080914),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_forward_rounded),
                   ),
-                ),
-                const SizedBox(height: 25),
-                Container(
-                  width: 85,
-                  height: 85,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(27),
-                    gradient: LinearGradient(
-                      colors: [
-                        room['color'] as Color,
-                        (room['color'] as Color).withOpacity(0.45),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.room['title'] as String,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${widget.room['people']} مستمع',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white54,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  child: Icon(
-                    room['icon'] as IconData,
-                    size: 42,
+                  IconButton(
+                    onPressed: () {},
+                    icon: const Icon(Icons.more_vert_rounded),
                   ),
+                ],
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                gradient: LinearGradient(
+                  colors: [
+                    roomColor.withOpacity(0.8),
+                    const Color(0xFF15172B),
+                  ],
                 ),
-                const SizedBox(height: 15),
-                Text(
-                  room['title'] as String,
-                  style: const TextStyle(
-                    fontSize: 25,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 62,
+                    height: 62,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.white.withOpacity(0.12),
+                    ),
+                    child: Icon(
+                      widget.room['icon'] as IconData,
+                      size: 31,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'غرفة مباشرة الآن',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'تكلم واستمتع مع الموجودين',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.circle,
+                    color: Colors.greenAccent,
+                    size: 11,
+                  ),
+                ],
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '🎙️ المتحدثون',
+                  style: TextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 7),
-                Text(
-                  room['subtitle'] as String,
-                  style: const TextStyle(color: Colors.white54),
-                ),
-                const SizedBox(height: 28),
-                Expanded(
-                  child: GridView.count(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 18,
-                    crossAxisSpacing: 10,
-                    children: List.generate(
-                      8,
-                      (index) {
-                        return Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 25,
-                              backgroundColor: const Color(0xFF292C44),
-                              child: Text(
-                                String.fromCharCode(65 + index),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              'عضو ${index + 1}',
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white54,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 56,
-                  child: FilledButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(Icons.mic_rounded),
-                    label: const Text(
-                      'دخول الغرفة',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 105,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                children: [
+                  _speaker('أحمد', 'A', true),
+                  _speaker('سارة', 'S', false),
+                  _speaker('محمد', 'M', false),
+                  _speaker('ليان', 'L', false),
+                  _speaker('أنت', '👤', micOn),
+                ],
+              ),
+            ),
+            const Divider(
+              color: Colors.white10,
+              height: 30,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '💬 الدردشة',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundColor: roomColor.withOpacity(0.35),
+                          child: Text(
+                            String.fromCharCode(65 + index),
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF14172A),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Text(messages[index]),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: Row(
+                children: [
+                  _roomButton(
+                    Icons.card_giftcard_rounded,
+                    () {},
+                  ),
+                  const SizedBox(width: 8),
+                  _roomButton(
+                    Icons.favorite_rounded,
+                    () {
+                      setState(() {
+                        likes++;
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF14172A),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 18),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            'اكتب رسالة...',
+                            style: TextStyle(
+                              color: Colors.white38,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        micOn = !micOn;
+                      });
+                    },
+                    child: Container(
+                      width: 54,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: micOn
+                              ? [
+                                  Colors.green,
+                                  Colors.teal,
+                                ]
+                              : [
+                                  const Color(0xFF7C4DFF),
+                                  const Color(0xFFE040FB),
+                                ],
+                        ),
+                      ),
+                      child: Icon(
+                        micOn
+                            ? Icons.mic_rounded
+                            : Icons.mic_off_rounded,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _speaker(
+    String name,
+    String avatar,
+    bool active,
+  ) {
+    return Container(
+      width: 78,
+      margin: const EdgeInsets.only(right: 13),
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                backgroundColor: const Color(0xFF242740),
+                child: Text(
+                  avatar,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              if (active)
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 18,
+                    height: 18,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.greenAccent,
+                    ),
+                    child: const Icon(
+                      Icons.mic_rounded,
+                      size: 11,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+            ],
           ),
-        );
-      },
+          const SizedBox(height: 7),
+          Text(
+            name,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _roomButton(
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: const BoxDecoration(
+          shape: BoxShape.circle,
+          color: Color(0xFF14172A),
+        ),
+        child: Icon(icon, size: 21),
+      ),
     );
   }
 }
