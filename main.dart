@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage> {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [
                 Colors.deepPurple,
                 Colors.deepPurpleAccent,
@@ -223,20 +223,27 @@ class _HomePageState extends State<HomePage> {
                           size: 16,
                         ),
                         const SizedBox(width: 4),
-                        Text('${room['speakers']} متحدث'),
+                        Text(
+                          '${room['speakers']} متحدث',
+                        ),
                         const SizedBox(width: 12),
                         const Icon(
                           Icons.people,
                           size: 16,
                         ),
                         const SizedBox(width: 4),
-                        Text('${room['listeners']} مستمع'),
+                        Text(
+                          '${room['listeners']} مستمع',
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 16),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
+              ),
             ],
           ),
         ),
@@ -319,7 +326,9 @@ class _HomePageState extends State<HomePage> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (BuildContext context) {
-          return RoomPage(roomName: roomName);
+          return RoomPage(
+            roomName: roomName,
+          );
         },
       ),
     );
@@ -401,17 +410,17 @@ class RoomPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 FloatingActionButton(
-                  heroTag: 'mic',
+                  heroTag: 'micButton',
                   onPressed: () {},
                   child: const Icon(Icons.mic),
                 ),
                 FloatingActionButton(
-                  heroTag: 'people',
+                  heroTag: 'peopleButton',
                   onPressed: () {},
                   child: const Icon(Icons.people),
                 ),
                 FloatingActionButton(
-                  heroTag: 'close',
+                  heroTag: 'closeButton',
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
