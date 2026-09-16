@@ -27,7 +27,9 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage> createState() {
+    return _HomePageState();
+  }
 }
 
 class _HomePageState extends State<HomePage> {
@@ -35,22 +37,28 @@ class _HomePageState extends State<HomePage> {
 
   final List<Map<String, dynamic>> rooms = [
     {
-      'name': 'غرفة الأصدقاء',
-      'icon': Icons.people,
+      'title': 'غرفة الأصدقاء',
       'speakers': 12,
       'listeners': 24,
+      'icon': Icons.people,
     },
     {
-      'name': 'موسيقى وسهر',
-      'icon': Icons.music_note,
+      'title': 'موسيقى وسهر',
       'speakers': 8,
       'listeners': 31,
+      'icon': Icons.music_note,
     },
     {
-      'name': 'تعرف ودردشة',
-      'icon': Icons.chat,
+      'title': 'تعرف ودردشة',
       'speakers': 6,
       'listeners': 18,
+      'icon': Icons.chat,
+    },
+    {
+      'title': 'سهرة Meko',
+      'speakers': 10,
+      'listeners': 27,
+      'icon': Icons.mic,
     },
   ];
 
@@ -65,15 +73,28 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.notifications_none),
+          ),
+        ],
       ),
-      body: _buildBody(),
-      floatingActionButton: currentIndex == 0
-          ? FloatingActionButton.extended(
-              onPressed: _createRoom,
-              icon: const Icon(Icons.add),
-              label: const Text('إنشاء غرفة'),
-            )
-          : null,
+      body: IndexedStack(
+        index: currentIndex,
+        children: [
+          buildHomePage(),
+          buildDiscoverPage(),
+          buildMessagesPage(),
+          buildProfilePage(),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showCreateRoomDialog();
+        },
+        child: const Icon(Icons.add),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentIndex,
         onDestinationSelected: (int index) {
@@ -90,7 +111,12 @@ class _HomePageState extends State<HomePage> {
           NavigationDestination(
             icon: Icon(Icons.explore_outlined),
             selectedIcon: Icon(Icons.explore),
-            label: 'اكتشف',
+            label: 'اكتشاف',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline),
+            selectedIcon: Icon(Icons.chat_bubble),
+            label: 'الرسائل',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
@@ -102,64 +128,46 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildBody() {
-    if (currentIndex == 1) {
-      return const Center(
-        child: Text(
-          'اكتشف غرفًا جديدة',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      );
-    }
-
-    if (currentIndex == 2) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 50,
-              child: Icon(
-                Icons.person,
-                size: 55,
-              ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'حسابي',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text('مرحبًا بك في Meko'),
-          ],
-        ),
-      );
-    }
-
+  Widget buildHomePage() {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text(
-          'مرحبًا بك في Meko 👋',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.deepPurple,
+                Colors.deepPurpleAccent,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(24),
           ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'ادخل إلى غرفة صوتية وتحدث مع الآخرين.',
-          style: TextStyle(fontSize: 16),
+          child: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'أهلاً بك في Meko 👋',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'تحدث، استمع وتعرف على أصدقاء جدد',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 24),
         const Text(
-          'الغرف الصوتية المباشرة',
+          'الغرف الصوتية',
           style: TextStyle(
             fontSize: 21,
             fontWeight: FontWeight.bold,
@@ -167,98 +175,171 @@ class _HomePageState extends State<HomePage> {
         ),
         const SizedBox(height: 12),
         ...rooms.map(
-          (room) {
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
-                contentPadding: const EdgeInsets.all(12),
-                leading: CircleAvatar(
-                  radius: 29,
-                  child: Icon(
-                    room['icon'] as IconData,
-                  ),
-                ),
-                title: Text(
-                  room['name'] as String,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 17,
-                  ),
-                ),
-                subtitle: Text(
-                  '${room['speakers']} متحدث • '
-                  '${room['listeners']} مستمع',
-                ),
-                trailing: const Icon(
-                  Icons.chevron_right,
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return RoomPage(
-                          roomName: room['name'] as String,
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            );
+          (Map<String, dynamic> room) {
+            return buildRoomCard(room);
           },
         ),
       ],
     );
   }
 
-  void _createRoom() {
-    final TextEditingController controller =
-        TextEditingController();
+  Widget buildRoomCard(Map<String, dynamic> room) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 14),
+      elevation: 1,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          openRoom(room['title'] as String);
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 30,
+                child: Icon(
+                  room['icon'] as IconData,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      room['title'] as String,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.mic,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text('${room['speakers']} متحدث'),
+                        const SizedBox(width: 12),
+                        const Icon(
+                          Icons.people,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 4),
+                        Text('${room['listeners']} مستمع'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.arrow_forward_ios, size: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
+  Widget buildDiscoverPage() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.explore,
+            size: 70,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'اكتشف غرف وأصدقاء جدد',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildMessagesPage() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.chat_bubble_outline,
+            size: 70,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'لا توجد رسائل حالياً',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildProfilePage() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            radius: 45,
+            child: Icon(
+              Icons.person,
+              size: 50,
+            ),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'حساب Meko',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text('ملفك الشخصي'),
+        ],
+      ),
+    );
+  }
+
+  void openRoom(String roomName) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return RoomPage(roomName: roomName);
+        },
+      ),
+    );
+  }
+
+  void showCreateRoomDialog() {
     showDialog(
       context: context,
-      builder: (dialogContext) {
+      builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('إنشاء غرفة'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'اسم الغرفة',
-              border: OutlineInputBorder(),
-            ),
+          content: const Text(
+            'سيتم إضافة إنشاء الغرف الصوتية في الخطوة القادمة.',
           ),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(dialogContext);
+                Navigator.of(context).pop();
               },
-              child: const Text('إلغاء'),
-            ),
-            FilledButton(
-              onPressed: () {
-                final String name =
-                    controller.text.trim();
-
-                if (name.isEmpty) {
-                  return;
-                }
-
-                Navigator.pop(dialogContext);
-
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) {
-                      return RoomPage(
-                        roomName: name,
-                      );
-                    },
-                  ),
-                );
-              },
-              child: const Text('إنشاء'),
+              child: const Text('حسناً'),
             ),
           ],
         );
@@ -267,7 +348,7 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class RoomPage extends StatefulWidget {
+class RoomPage extends StatelessWidget {
   final String roomName;
 
   const RoomPage({
@@ -276,93 +357,65 @@ class RoomPage extends StatefulWidget {
   });
 
   @override
-  State<RoomPage> createState() => _RoomPageState();
-}
-
-class _RoomPageState extends State<RoomPage> {
-  bool microphoneOn = true;
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.roomName),
-        centerTitle: true,
+        title: Text(roomName),
       ),
       body: Column(
         children: [
-          const SizedBox(height: 30),
-          const CircleAvatar(
-            radius: 50,
-            child: Icon(
-              Icons.groups,
-              size: 55,
-            ),
-          ),
-          const SizedBox(height: 15),
-          Text(
-            widget.roomName,
-            style: const TextStyle(
-              fontSize: 23,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'غرفة صوتية',
-            style: TextStyle(fontSize: 16),
-          ),
-          const SizedBox(height: 30),
-          const Text(
-            'المتحدثون',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const Expanded(
+          Expanded(
             child: Center(
-              child: Text(
-                'أنت داخل الغرفة\n'
-                'الصوت الحقيقي سيتم ربطه لاحقًا.',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 17),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircleAvatar(
+                    radius: 50,
+                    child: Icon(
+                      Icons.mic,
+                      size: 55,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    roomName,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'الغرفة الصوتية جاهزة',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(
-              left: 24,
-              right: 24,
-              bottom: 30,
-            ),
+            padding: const EdgeInsets.all(20),
             child: Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                FloatingActionButton.large(
-                  heroTag: 'mic_button',
-                  onPressed: () {
-                    setState(() {
-                      microphoneOn = !microphoneOn;
-                    });
-                  },
-                  child: Icon(
-                    microphoneOn
-                        ? Icons.mic
-                        : Icons.mic_off,
-                  ),
+                FloatingActionButton(
+                  heroTag: 'mic',
+                  onPressed: () {},
+                  child: const Icon(Icons.mic),
                 ),
-                FloatingActionButton.large(
-                  heroTag: 'leave_button',
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
+                FloatingActionButton(
+                  heroTag: 'people',
+                  onPressed: () {},
+                  child: const Icon(Icons.people),
+                ),
+                FloatingActionButton(
+                  heroTag: 'close',
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.of(context).pop();
                   },
-                  child: const Icon(
-                    Icons.call_end,
-                  ),
+                  child: const Icon(Icons.close),
                 ),
               ],
             ),
