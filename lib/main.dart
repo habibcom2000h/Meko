@@ -6,7 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase error: $e');
+  }
 
   runApp(const MekoApp());
 }
@@ -73,9 +77,7 @@ class _LoginPageState extends State<LoginPage> {
         'Firebase: ${e.code}\n${e.message ?? ''}',
       );
     } catch (e) {
-      showMessage(
-        'خطأ: $e',
-      );
+      showMessage('خطأ: $e');
     }
 
     if (mounted) {
@@ -257,9 +259,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'Firebase: ${e.code}\n${e.message ?? ''}',
       );
     } catch (e) {
-      showMessage(
-        'خطأ: $e',
-      );
+      showMessage('خطأ: $e');
     }
 
     if (mounted) {
@@ -378,7 +378,11 @@ class HomePage extends StatelessWidget {
   ];
 
   Future<void> logout(BuildContext context) async {
-    await FirebaseAuth.instance.signOut();
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      debugPrint('Logout error: $e');
+    }
 
     if (!context.mounted) return;
 
