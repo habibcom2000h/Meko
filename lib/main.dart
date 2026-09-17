@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MekoApp());
 }
 
@@ -18,89 +23,176 @@ class MekoApp extends StatelessWidget {
           seedColor: Colors.deepPurple,
         ),
       ),
-      home: const WelcomePage(),
+      home: const StartPage(),
     );
   }
 }
 
-class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
+class StartPage extends StatelessWidget {
+  const StartPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
+        if (snapshot.hasData) {
+          return const HomePage();
+        }
+
+        return const LoginPage();
+      },
+    );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool loading = false;
+
+  Future<void> login() async {
+    if (emailController.text.trim().isEmpty ||
+        passwordController.text.isEmpty) {
+      showMessage('اكتب الإيميل وكلمة المرور');
+      return;
+    }
+
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+    } on FirebaseAuthException catch (e) {
+      showMessage(e.message ?? 'حدث خطأ أثناء تسجيل الدخول');
+    } catch (e) {
+      showMessage('حدث خطأ غير متوقع');
+    }
+
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  void showMessage(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text)),
+    );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 110,
-                  height: 110,
-                  decoration: BoxDecoration(
-                    color: Colors.deepPurple,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: const Icon(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const Icon(
                     Icons.mic,
-                    size: 60,
-                    color: Colors.white,
+                    size: 80,
                   ),
-                ),
-                const SizedBox(height: 25),
-                const Text(
-                  'Meko',
-                  style: TextStyle(
-                    fontSize: 42,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'غرف صوتية ودردشة',
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 40),
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'دخول إلى Meko',
-                      style: TextStyle(fontSize: 18),
+                  const SizedBox(height: 15),
+                  const Text(
+                    'Meko',
+                    style: TextStyle(
+                      fontSize: 38,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-                const SizedBox(height: 15),
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: OutlinedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomePage(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'تجربة التطبيق',
-                      style: TextStyle(fontSize: 18),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'غرف صوتية ودردشة',
+                    style: TextStyle(fontSize: 17),
+                  ),
+                  const SizedBox(height: 35),
+                  TextField(
+                    controller: emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'البريد الإلكتروني',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.email),
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 15),
+                  TextField(
+                    controller: passwordController,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'كلمة المرور',
+                      border: OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: FilledButton(
+                      onPressed: loading ? null : login,
+                      child: loading
+                          ? const CircularProgressIndicator()
+                          : const Text(
+                              'تسجيل الدخول',
+                              style: TextStyle(fontSize: 17),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: OutlinedButton(
+                      onPressed: loading
+                          ? null
+                          : () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const RegisterPage(),
+                                ),
+                              );
+                            },
+                      child: const Text(
+                        'إنشاء حساب جديد',
+                        style: TextStyle(fontSize: 17),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -109,503 +201,252 @@ class WelcomePage extends StatelessWidget {
   }
 }
 
-class LoginPage extends StatelessWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool loading = false;
+
+  Future<void> register() async {
+    if (nameController.text.trim().isEmpty ||
+        emailController.text.trim().isEmpty ||
+        passwordController.text.length < 6) {
+      showMessage(
+        'اكتب الاسم والإيميل وكلمة مرور من 6 أحرف على الأقل',
+      );
+      return;
+    }
+
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      final result =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      );
+
+      final user = result.user;
+
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'name': nameController.text.trim(),
+          'email': emailController.text.trim(),
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      if (mounted) {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const HomePage(),
+          ),
+          (route) => false,
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      showMessage(e.message ?? 'تعذر إنشاء الحساب');
+    } catch (e) {
+      showMessage('حدث خطأ أثناء إنشاء الحساب');
+    }
+
+    if (mounted) {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  void showMessage(String text) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text)),
+    );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('تسجيل الدخول'),
+        title: const Text('إنشاء حساب'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
-            const Icon(
-              Icons.account_circle,
-              size: 90,
-              color: Colors.deepPurple,
-            ),
-            const SizedBox(height: 25),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'رقم الهاتف أو البريد الإلكتروني',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
-              ),
-            ),
-            const SizedBox(height: 15),
-            const TextField(
-              obscureText: true,
-              decoration: InputDecoration(
-                labelText: 'كلمة المرور',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
-              ),
-            ),
-            const SizedBox(height: 25),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomePage(),
-                    ),
-                  );
-                },
-                child: const Text(
-                  'دخول',
-                  style: TextStyle(fontSize: 18),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                const Icon(
+                  Icons.person_add,
+                  size: 70,
                 ),
-              ),
+                const SizedBox(height: 25),
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'الاسم',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.person),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(
+                    labelText: 'البريد الإلكتروني',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.email),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    labelText: 'كلمة المرور',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock),
+                  ),
+                ),
+                const SizedBox(height: 25),
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: FilledButton(
+                    onPressed: loading ? null : register,
+                    child: loading
+                        ? const CircularProgressIndicator()
+                        : const Text(
+                            'إنشاء الحساب',
+                            style: TextStyle(fontSize: 17),
+                          ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 15),
-            TextButton(
-              onPressed: () {},
-              child: const Text('إنشاء حساب جديد'),
-            ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int currentIndex = 0;
-
-  final List<Map<String, dynamic>> rooms = [
+  static const rooms = [
     {
-      'name': 'غرفة الأصدقاء',
-      'users': 24,
+      'title': 'غرفة الأصدقاء',
       'speakers': 12,
+      'listeners': 24,
       'icon': Icons.people,
     },
     {
-      'name': 'موسيقى وسهر',
-      'users': 31,
+      'title': 'موسيقى وسهر',
       'speakers': 8,
+      'listeners': 31,
       'icon': Icons.music_note,
     },
     {
-      'name': 'تعرف ودردشة',
-      'users': 18,
+      'title': 'تعرف ودردشة',
       'speakers': 6,
+      'listeners': 18,
       'icon': Icons.chat,
-    },
-    {
-      'name': 'سوالف الليل',
-      'users': 42,
-      'speakers': 10,
-      'icon': Icons.nightlight,
     },
   ];
 
+  Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final pages = [
-      buildHome(),
-      const DiscoverPage(),
-      const MessagesPage(),
-      const ProfilePage(),
-    ];
-
     return Scaffold(
-      body: pages[currentIndex],
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'الرئيسية',
+      appBar: AppBar(
+        title: const Text(
+          'Meko',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
           ),
-          NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
-            label: 'اكتشاف',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline),
-            selectedIcon: Icon(Icons.chat_bubble),
-            label: 'الرسائل',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'حسابي',
+        ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            onPressed: logout,
+            icon: const Icon(Icons.logout),
           ),
         ],
       ),
-    );
-  }
-
-  Widget buildHome() {
-    return SafeArea(
-      child: ListView(
+      body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  'Meko',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.notifications_none),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'اكتشف غرف صوتية جديدة',
-            style: TextStyle(fontSize: 18),
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Colors.deepPurple,
-                  Colors.purple,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(22),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '🎙️ أهلاً بك في Meko',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'ادخل غرفة وتكلم مع الآخرين',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 25),
           const Text(
             'الغرف الصوتية',
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 15),
           ...rooms.map(
             (room) => Card(
               margin: const EdgeInsets.only(bottom: 12),
               child: ListTile(
-                contentPadding: const EdgeInsets.all(12),
+                contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
                   radius: 28,
-                  backgroundColor: Colors.deepPurple.shade100,
-                  child: Icon(
-                    room['icon'],
-                    color: Colors.deepPurple,
-                  ),
+                  child: Icon(room['icon'] as IconData),
                 ),
                 title: Text(
-                  room['name'],
+                  room['title'] as String,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 17,
+                    fontSize: 18,
                   ),
                 ),
-                subtitle: Text(
-                  '${room['speakers']} متحدث • ${room['users']} مستمع',
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    '${room['speakers']} متحدث • '
+                    '${room['listeners']} مستمع',
+                  ),
                 ),
-                trailing: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => VoiceRoomPage(
-                          roomName: room['name'],
-                        ),
-                      ),
-                    );
-                  },
-                  child: const Text('دخول'),
+                trailing: const Icon(
+                  Icons.arrow_forward_ios,
                 ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class VoiceRoomPage extends StatefulWidget {
-  final String roomName;
-
-  const VoiceRoomPage({
-    super.key,
-    required this.roomName,
-  });
-
-  @override
-  State<VoiceRoomPage> createState() => _VoiceRoomPageState();
-}
-
-class _VoiceRoomPageState extends State<VoiceRoomPage> {
-  bool microphoneOn = true;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.roomName),
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 25),
-          const Text(
-            'الغرفة الصوتية',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 30),
-          Expanded(
-            child: GridView.builder(
-              padding: const EdgeInsets.all(20),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                mainAxisSpacing: 20,
-                crossAxisSpacing: 20,
-              ),
-              itemCount: 6,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 32,
-                      backgroundColor: Colors.deepPurple.shade100,
-                      child: const Icon(
-                        Icons.person,
-                        size: 35,
-                        color: Colors.deepPurple,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'الغرفة الصوتية قيد التطوير 🎙️',
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text('عضو ${index + 1}'),
-                  ],
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      microphoneOn = !microphoneOn;
-                    });
-                  },
-                  child: Icon(
-                    microphoneOn ? Icons.mic : Icons.mic_off,
-                  ),
-                ),
-                FloatingActionButton(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Icon(Icons.call_end),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class DiscoverPage extends StatelessWidget {
-  const DiscoverPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('اكتشاف'),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const TextField(
-            decoration: InputDecoration(
-              hintText: 'ابحث عن غرفة...',
-              prefixIcon: Icon(Icons.search),
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 25),
-          const Text(
-            'غرف مقترحة',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 15),
-          for (final name in [
-            'أصدقاء جدد',
-            'الألعاب',
-            'الرياضة',
-            'الموسيقى',
-          ])
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.mic),
-                title: Text(name),
-                trailing: const Icon(Icons.arrow_forward_ios),
+                  );
+                },
               ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class MessagesPage extends StatelessWidget {
-  const MessagesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('الرسائل'),
-      ),
-      body: ListView(
-        children: const [
-          ListTile(
-            leading: CircleAvatar(
-              child: Icon(Icons.person),
-            ),
-            title: Text('أحمد'),
-            subtitle: Text('أهلاً، كيفك؟'),
-            trailing: Text('10:30'),
-          ),
-          ListTile(
-            leading: CircleAvatar(
-              child: Icon(Icons.person),
-            ),
-            title: Text('محمد'),
-            subtitle: Text('نشوفك بالغرفة'),
-            trailing: Text('09:15'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('حسابي'),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const SizedBox(height: 20),
-          const CircleAvatar(
-            radius: 55,
-            child: Icon(
-              Icons.person,
-              size: 65,
-            ),
-          ),
-          const SizedBox(height: 15),
-          const Center(
-            child: Text(
-              'مستخدم Meko',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 30),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('الإعدادات'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {},
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.help_outline),
-              title: const Text('المساعدة'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {},
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.logout),
-              title: const Text('تسجيل الخروج'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const WelcomePage(),
-                  ),
-                  (route) => false,
-                );
-              },
             ),
           ),
         ],
