@@ -1,18 +1,20 @@
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
+plugins {
+    id "com.android.application"
+}
+
+android {
+    namespace "com.meko.meko"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.meko.meko"
+        minSdk 23
+        targetSdk 36
+        versionCode 1
+        versionName "1.0"
     }
 }
 
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-    }
+flutter {
+    source "../.."
 }
-
-rootProject.name = "meko"
-include(":app")
