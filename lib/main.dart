@@ -21,13 +21,183 @@ class MekoApp extends StatelessWidget {
           brightness: Brightness.dark,
         ),
       ),
-      home: const HomePage(),
+      home: const LoginPage(),
+    );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final nameController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  bool obscurePassword = true;
+
+  void login() {
+    final name = nameController.text.trim();
+
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('اكتب اسم المستخدم أولاً'),
+        ),
+      );
+      return;
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(
+          username: name,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF7C4DFF),
+                        Color(0xFFB388FF),
+                      ],
+                    ),
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.mic,
+                    size: 52,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 22),
+                const Text(
+                  'Meko',
+                  style: TextStyle(
+                    fontSize: 38,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'صوتك... عالمك... أصدقاءك 🎙️',
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.white.withOpacity(0.65),
+                  ),
+                ),
+                const SizedBox(height: 40),
+                TextField(
+                  controller: nameController,
+                  textInputAction: TextInputAction.next,
+                  decoration: InputDecoration(
+                    labelText: 'اسم المستخدم',
+                    hintText: 'اكتب اسمك',
+                    prefixIcon: const Icon(Icons.person_outline),
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: passwordController,
+                  obscureText: obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: 'كلمة المرور',
+                    hintText: 'اكتب كلمة المرور',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          obscurePassword = !obscurePassword;
+                        });
+                      },
+                      icon: Icon(
+                        obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                      ),
+                    ),
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: FilledButton(
+                    onPressed: login,
+                    child: const Text(
+                      'دخول',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                TextButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'إنشاء الحساب الحقيقي سنضيفه في المرحلة القادمة 🚀',
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('إنشاء حساب جديد'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String username;
+
+  const HomePage({
+    super.key,
+    required this.username,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -74,15 +244,10 @@ class _HomePageState extends State<HomePage> {
             fontSize: 25,
           ),
         ),
-        centerTitle: false,
         actions: [
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.notifications_none),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.search),
           ),
         ],
       ),
@@ -132,30 +297,21 @@ class _HomePageState extends State<HomePage> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const Text(
-          'أهلاً بك في Meko 👋',
-          style: TextStyle(
+        Text(
+          'أهلاً ${widget.username} 👋',
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          'ادخل غرفة وتعرف على أشخاص جدد',
+          'الغرف النشطة الآن 🔥',
           style: TextStyle(
             color: Colors.white.withOpacity(0.65),
-            fontSize: 15,
           ),
         ),
-        const SizedBox(height: 22),
-        const Text(
-          'الغرف النشطة 🔥',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 20),
         ...rooms.map(
           (room) => roomCard(room),
         ),
@@ -280,46 +436,29 @@ class _HomePageState extends State<HomePage> {
 
   Widget createPage() {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.mic,
-              size: 80,
-              color: Color(0xFF9C6CFF),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.mic,
+            size: 80,
+            color: Color(0xFF9C6CFF),
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'إنشاء غرفة صوتية',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 20),
-            const Text(
-              'إنشاء غرفة صوتية',
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'أنشئ غرفتك وابدأ الدردشة مع الآخرين',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.65),
-              ),
-            ),
-            const SizedBox(height: 25),
-            FilledButton.icon(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('سيتم تفعيل إنشاء الغرف قريباً 🚀'),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('إنشاء غرفة'),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: () {},
+            icon: const Icon(Icons.add),
+            label: const Text('إنشاء غرفة'),
+          ),
+        ],
       ),
     );
   }
@@ -336,52 +475,36 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         const SizedBox(height: 14),
-        const Center(
+        Center(
           child: Text(
-            'عضو Meko',
-            style: TextStyle(
+            widget.username,
+            style: const TextStyle(
               fontSize: 23,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        const SizedBox(height: 22),
-        Row(
+        const SizedBox(height: 25),
+        const Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: const [
-            Stat(
-              number: '0',
-              title: 'المتابعون',
-            ),
-            Stat(
-              number: '0',
-              title: 'أتابعهم',
-            ),
-            Stat(
-              number: '0',
-              title: 'الغرف',
-            ),
+          children: [
+            Stat(number: '0', title: 'المتابعون'),
+            Stat(number: '0', title: 'أتابعهم'),
+            Stat(number: '0', title: 'الغرف'),
           ],
         ),
-        const SizedBox(height: 30),
-        Card(
+        const SizedBox(height: 25),
+        const Card(
           child: ListTile(
-            leading: const Icon(Icons.star),
-            title: const Text('النقاط'),
-            trailing: const Text(
+            leading: Icon(Icons.star),
+            title: Text('النقاط'),
+            trailing: Text(
               '0',
               style: TextStyle(
-                fontWeight: FontWeight.bold,
                 fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text('الإعدادات'),
-            trailing: const Icon(Icons.chevron_left),
           ),
         ),
       ],
@@ -461,9 +584,6 @@ class _VoiceRoomState extends State<VoiceRoom> {
           const SizedBox(height: 8),
           Text(
             '${widget.room['people']} شخص داخل الغرفة',
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.65),
-            ),
           ),
           const SizedBox(height: 25),
           Row(
@@ -500,8 +620,8 @@ class _VoiceRoomState extends State<VoiceRoom> {
               ),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 10, 16, 18),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: Row(
               children: [
                 Expanded(
@@ -516,7 +636,6 @@ class _VoiceRoomState extends State<VoiceRoom> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
                 IconButton(
                   onPressed: () {
                     setState(() {
