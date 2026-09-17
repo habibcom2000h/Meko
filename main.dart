@@ -48,27 +48,28 @@ class StartPage extends StatelessWidget {
           return const HomePage();
         }
 
-        return const AuthPage();
+        return const LoginPage();
       },
     );
   }
 }
 
-class AuthPage extends StatefulWidget {
-  const AuthPage({super.key});
+// ==================== تسجيل الدخول ====================
+
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  State<AuthPage> createState() => _AuthPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _LoginPageState extends State<LoginPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  bool isLogin = true;
   bool loading = false;
 
-  Future<void> submit() async {
+  Future<void> login() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
@@ -77,50 +78,26 @@ class _AuthPageState extends State<AuthPage> {
       return;
     }
 
-    if (password.length < 6) {
-      showMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
-      return;
-    }
-
     setState(() {
       loading = true;
     });
 
     try {
-      if (isLogin) {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-      } else {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-
-        if (!mounted) return;
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const ProfilePage(),
-          ),
-        );
-      }
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
     } on FirebaseAuthException catch (e) {
       String message = 'حدث خطأ';
 
-      if (e.code == 'user-not-found') {
+      if (e.code == 'invalid-credential') {
+        message = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+      } else if (e.code == 'user-not-found') {
         message = 'الحساب غير موجود';
-      } else if (e.code == 'wrong-password' ||
-          e.code == 'invalid-credential') {
-        message = 'البريد أو كلمة المرور غير صحيحة';
-      } else if (e.code == 'email-already-in-use') {
-        message = 'هذا البريد مستخدم من قبل';
       } else if (e.code == 'invalid-email') {
         message = 'البريد الإلكتروني غير صحيح';
-      } else if (e.code == 'weak-password') {
-        message = 'كلمة المرور ضعيفة';
+      } else if (e.code == 'wrong-password') {
+        message = 'كلمة المرور غير صحيحة';
       }
 
       showMessage(message);
@@ -169,11 +146,9 @@ class _AuthPageState extends State<AuthPage> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  isLogin
-                      ? 'سجّل الدخول إلى حسابك'
-                      : 'أنشئ حساباً جديداً في Meko',
-                  style: const TextStyle(fontSize: 17),
+                const Text(
+                  'سجّل الدخول إلى حسابك',
+                  style: TextStyle(fontSize: 17),
                 ),
                 const SizedBox(height: 30),
                 TextField(
@@ -200,38 +175,37 @@ class _AuthPageState extends State<AuthPage> {
                   width: double.infinity,
                   height: 55,
                   child: FilledButton(
-                    onPressed: loading ? null : submit,
+                    onPressed: loading ? null : login,
                     child: loading
                         ? const SizedBox(
                             width: 25,
                             height: 25,
                             child: CircularProgressIndicator(),
                           )
-                        : Text(
-                            isLogin ? 'تسجيل الدخول' : 'إنشاء حساب',
-                            style: const TextStyle(fontSize: 18),
+                        : const Text(
+                            'تسجيل الدخول',
+                            style: TextStyle(fontSize: 18),
                           ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 SizedBox(
                   width: double.infinity,
-                  height: 50,
+                  height: 55,
                   child: OutlinedButton(
                     onPressed: loading
                         ? null
                         : () {
-                            setState(() {
-                              isLogin = !isLogin;
-                              emailController.clear();
-                              passwordController.clear();
-                            });
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const RegisterPage(),
+                              ),
+                            );
                           },
-                    child: Text(
-                      isLogin
-                          ? 'إنشاء حساب جديد'
-                          : 'العودة إلى تسجيل الدخول',
-                      style: const TextStyle(fontSize: 16),
+                    child: const Text(
+                      'إنشاء حساب جديد',
+                      style: TextStyle(fontSize: 17),
                     ),
                   ),
                 ),
@@ -243,6 +217,189 @@ class _AuthPageState extends State<AuthPage> {
     );
   }
 }
+
+// ==================== إنشاء حساب ====================
+
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmController = TextEditingController();
+
+  bool loading = false;
+
+  Future<void> register() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final confirm = confirmController.text.trim();
+
+    if (email.isEmpty ||
+        password.isEmpty ||
+        confirm.isEmpty) {
+      showMessage('املأ جميع الحقول');
+      return;
+    }
+
+    if (password.length < 6) {
+      showMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+
+    if (password != confirm) {
+      showMessage('كلمتا المرور غير متطابقتين');
+      return;
+    }
+
+    setState(() {
+      loading = true;
+    });
+
+    try {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ProfilePage(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = 'حدث خطأ';
+
+      if (e.code == 'email-already-in-use') {
+        message = 'هذا البريد مستخدم من قبل';
+      } else if (e.code == 'invalid-email') {
+        message = 'البريد الإلكتروني غير صحيح';
+      } else if (e.code == 'weak-password') {
+        message = 'كلمة المرور ضعيفة';
+      }
+
+      showMessage(message);
+    } finally {
+      if (mounted) {
+        setState(() {
+          loading = false;
+        });
+      }
+    }
+  }
+
+  void showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    confirmController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('إنشاء حساب'),
+        centerTitle: true,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const Icon(
+                Icons.person_add,
+                size: 75,
+                color: Colors.deepPurple,
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'إنشاء حساب جديد',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 30),
+              TextField(
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'البريد الإلكتروني',
+                  prefixIcon: Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'كلمة المرور',
+                  prefixIcon: Icon(Icons.lock_outline),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: confirmController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'تأكيد كلمة المرور',
+                  prefixIcon: Icon(Icons.lock_reset),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 25),
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: FilledButton(
+                  onPressed: loading ? null : register,
+                  child: loading
+                      ? const SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: CircularProgressIndicator(),
+                        )
+                      : const Text(
+                          'إنشاء الحساب',
+                          style: TextStyle(fontSize: 18),
+                        ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              TextButton(
+                onPressed: loading
+                    ? null
+                    : () {
+                        Navigator.pop(context);
+                      },
+                child: const Text('العودة إلى تسجيل الدخول'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ==================== الملف الشخصي ====================
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -296,14 +453,17 @@ class _ProfilePageState extends State<ProfilePage> {
 
       if (!mounted) return;
 
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => const HomePage(),
         ),
+        (route) => false,
       );
     } catch (e) {
-      showMessage('تعذر حفظ البيانات. تأكد من إعداد Firestore.');
+      showMessage(
+        'تعذر حفظ البيانات. تأكد من إعداد Firestore.',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -398,10 +558,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
+// ==================== الصفحة الرئيسية ====================
+
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  Future<void> logout(BuildContext context) async {
+  Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
   }
 
@@ -411,14 +573,16 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Meko',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
             tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),
-            onPressed: () => logout(context),
+            onPressed: logout,
           ),
         ],
       ),
@@ -434,19 +598,19 @@ class HomePage extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 30),
-          _roomCard(
+          roomCard(
             context,
             'غرفة الأصدقاء',
             '12 متحدث • 24 مستمع',
             Icons.people,
           ),
-          _roomCard(
+          roomCard(
             context,
             'موسيقى وسهر',
             '8 متحدث • 31 مستمع',
             Icons.music_note,
           ),
-          _roomCard(
+          roomCard(
             context,
             'تعرف ودردشة',
             '6 متحدث • 18 مستمع',
@@ -457,7 +621,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _roomCard(
+  Widget roomCard(
     BuildContext context,
     String title,
     String subtitle,
@@ -479,11 +643,15 @@ class HomePage extends StatelessWidget {
           ),
         ),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward_ios),
+        trailing: const Icon(
+          Icons.arrow_forward_ios,
+        ),
         onTap: () {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('الغرف الصوتية سيتم تشغيلها في الخطوة القادمة 🎙️'),
+              content: Text(
+                'الغرف الصوتية سيتم تشغيلها في الخطوة القادمة 🎙️',
+              ),
             ),
           );
         },
