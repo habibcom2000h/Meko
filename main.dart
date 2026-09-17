@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
   runApp(const MekoApp());
 }
 
@@ -158,14 +157,14 @@ class _AuthPageState extends State<AuthPage> {
               children: [
                 const Icon(
                   Icons.mic,
-                  size: 80,
+                  size: 85,
                   color: Colors.deepPurple,
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 const Text(
                   'Meko',
                   style: TextStyle(
-                    fontSize: 36,
+                    fontSize: 38,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -173,7 +172,7 @@ class _AuthPageState extends State<AuthPage> {
                 Text(
                   isLogin
                       ? 'سجّل الدخول إلى حسابك'
-                      : 'أنشئ حسابك في Meko',
+                      : 'أنشئ حساباً جديداً في Meko',
                   style: const TextStyle(fontSize: 17),
                 ),
                 const SizedBox(height: 30),
@@ -196,33 +195,44 @@ class _AuthPageState extends State<AuthPage> {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 25),
                 SizedBox(
                   width: double.infinity,
-                  height: 52,
+                  height: 55,
                   child: FilledButton(
                     onPressed: loading ? null : submit,
                     child: loading
-                        ? const CircularProgressIndicator()
+                        ? const SizedBox(
+                            width: 25,
+                            height: 25,
+                            child: CircularProgressIndicator(),
+                          )
                         : Text(
                             isLogin ? 'تسجيل الدخول' : 'إنشاء حساب',
-                            style: const TextStyle(fontSize: 17),
+                            style: const TextStyle(fontSize: 18),
                           ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: loading
-                      ? null
-                      : () {
-                          setState(() {
-                            isLogin = !isLogin;
-                          });
-                        },
-                  child: Text(
-                    isLogin
-                        ? 'ليس لديك حساب؟ إنشاء حساب'
-                        : 'لديك حساب؟ تسجيل الدخول',
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton(
+                    onPressed: loading
+                        ? null
+                        : () {
+                            setState(() {
+                              isLogin = !isLogin;
+                              emailController.clear();
+                              passwordController.clear();
+                            });
+                          },
+                    child: Text(
+                      isLogin
+                          ? 'إنشاء حساب جديد'
+                          : 'العودة إلى تسجيل الدخول',
+                      style: const TextStyle(fontSize: 16),
+                    ),
                   ),
                 ),
               ],
@@ -249,8 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> saveProfile() async {
     final name = nameController.text.trim();
-    final ageText = ageController.text.trim();
-    final age = int.tryParse(ageText);
+    final age = int.tryParse(ageController.text.trim());
 
     if (name.isEmpty) {
       showMessage('اكتب اسم المستخدم');
@@ -290,11 +299,11 @@ class _ProfilePageState extends State<ProfilePage> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => const WelcomePage(),
+          builder: (_) => const HomePage(),
         ),
       );
     } catch (e) {
-      showMessage('تعذر حفظ البيانات');
+      showMessage('تعذر حفظ البيانات. تأكد من إعداد Firestore.');
     } finally {
       if (mounted) {
         setState(() {
@@ -329,19 +338,20 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           children: [
             const CircleAvatar(
-              radius: 55,
+              radius: 60,
               child: Icon(
                 Icons.person,
-                size: 60,
+                size: 65,
               ),
             ),
             const SizedBox(height: 25),
             const Text(
               'أهلاً بك في Meko 👋',
               style: TextStyle(
-                fontSize: 26,
+                fontSize: 27,
                 fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             const Text(
@@ -370,14 +380,14 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 25),
             SizedBox(
               width: double.infinity,
-              height: 52,
+              height: 55,
               child: FilledButton(
                 onPressed: saving ? null : saveProfile,
                 child: saving
                     ? const CircularProgressIndicator()
                     : const Text(
                         'متابعة',
-                        style: TextStyle(fontSize: 17),
+                        style: TextStyle(fontSize: 18),
                       ),
               ),
             ),
@@ -388,66 +398,12 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-class WelcomePage extends StatelessWidget {
-  const WelcomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(
-                Icons.celebration,
-                size: 90,
-                color: Colors.deepPurple,
-              ),
-              const SizedBox(height: 25),
-              const Text(
-                'أهلاً وسهلاً بك في Meko 🎉',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'تم إنشاء حسابك بنجاح',
-                style: TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 35),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: FilledButton(
-                  onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const HomePage(),
-                      ),
-                    );
-                  },
-                  child: const Text(
-                    'دخول إلى Meko',
-                    style: TextStyle(fontSize: 17),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  Future<void> logout(BuildContext context) async {
+    await FirebaseAuth.instance.signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -460,21 +416,77 @@ class HomePage extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
+            tooltip: 'تسجيل الخروج',
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-            },
+            onPressed: () => logout(context),
           ),
         ],
       ),
-      body: const Center(
-        child: Text(
-          'مرحباً بك في Meko 🎉',
-          style: TextStyle(
-            fontSize: 24,
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          const Text(
+            'مرحباً بك في Meko 🎉',
+            style: TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
+          _roomCard(
+            context,
+            'غرفة الأصدقاء',
+            '12 متحدث • 24 مستمع',
+            Icons.people,
+          ),
+          _roomCard(
+            context,
+            'موسيقى وسهر',
+            '8 متحدث • 31 مستمع',
+            Icons.music_note,
+          ),
+          _roomCard(
+            context,
+            'تعرف ودردشة',
+            '6 متحدث • 18 مستمع',
+            Icons.chat,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _roomCard(
+    BuildContext context,
+    String title,
+    String subtitle,
+    IconData icon,
+  ) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 14),
+      child: ListTile(
+        contentPadding: const EdgeInsets.all(16),
+        leading: CircleAvatar(
+          radius: 28,
+          child: Icon(icon),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: 17,
           ),
         ),
+        subtitle: Text(subtitle),
+        trailing: const Icon(Icons.arrow_forward_ios),
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('الغرف الصوتية سيتم تشغيلها في الخطوة القادمة 🎙️'),
+            ),
+          );
+        },
       ),
     );
   }
