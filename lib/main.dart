@@ -14,11 +14,8 @@ class MekoApp extends StatelessWidget {
       title: 'Meko',
       theme: ThemeData(
         useMaterial3: true,
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF090A12),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF7C4DFF),
-          brightness: Brightness.dark,
+          seedColor: Colors.deepPurple,
         ),
       ),
       home: const LoginPage(),
@@ -34,18 +31,24 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final nameController = TextEditingController();
-  final passwordController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  bool obscurePassword = true;
+  bool hidePassword = true;
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   void login() {
-    final name = nameController.text.trim();
-
-    if (name.isEmpty) {
+    if (phoneController.text.trim().isEmpty ||
+        passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('اكتب اسم المستخدم أولاً'),
+          content: Text('يرجى إدخال رقم الهاتف وكلمة المرور'),
         ),
       );
       return;
@@ -54,18 +57,9 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => HomePage(
-          username: name,
-        ),
+        builder: (context) => const HomePage(),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    passwordController.dispose();
-    super.dispose();
   }
 
   @override
@@ -77,26 +71,24 @@ class _LoginPageState extends State<LoginPage> {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
+                const SizedBox(height: 30),
+
                 Container(
-                  width: 100,
-                  height: 100,
+                  width: 90,
+                  height: 90,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF7C4DFF),
-                        Color(0xFFB388FF),
-                      ],
-                    ),
+                    color: Colors.deepPurple,
+                    borderRadius: BorderRadius.circular(28),
                   ),
-                  alignment: Alignment.center,
                   child: const Icon(
                     Icons.mic,
-                    size: 52,
                     color: Colors.white,
+                    size: 50,
                   ),
                 ),
-                const SizedBox(height: 22),
+
+                const SizedBox(height: 20),
+
                 const Text(
                   'Meko',
                   style: TextStyle(
@@ -104,83 +96,105 @@ class _LoginPageState extends State<LoginPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'صوتك... عالمك... أصدقاءك 🎙️',
+
+                const SizedBox(height: 8),
+
+                const Text(
+                  'تواصل، دردش، واستمتع بالصوت',
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.white.withOpacity(0.65),
+                    fontSize: 16,
+                    color: Colors.grey,
                   ),
                 ),
+
                 const SizedBox(height: 40),
+
                 TextField(
-                  controller: nameController,
-                  textInputAction: TextInputAction.next,
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
-                    labelText: 'اسم المستخدم',
-                    hintText: 'اكتب اسمك',
-                    prefixIcon: const Icon(Icons.person_outline),
-                    filled: true,
+                    labelText: 'رقم الهاتف',
+                    prefixIcon: const Icon(Icons.phone),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
+
+                const SizedBox(height: 16),
+
                 TextField(
                   controller: passwordController,
-                  obscureText: obscurePassword,
+                  obscureText: hidePassword,
                   decoration: InputDecoration(
                     labelText: 'كلمة المرور',
-                    hintText: 'اكتب كلمة المرور',
-                    prefixIcon: const Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       onPressed: () {
                         setState(() {
-                          obscurePassword = !obscurePassword;
+                          hidePassword = !hidePassword;
                         });
                       },
                       icon: Icon(
-                        obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+                        hidePassword
+                            ? Icons.visibility
+                            : Icons.visibility_off,
                       ),
                     ),
-                    filled: true,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                const SizedBox(height: 22),
+
+                const SizedBox(height: 24),
+
                 SizedBox(
                   width: double.infinity,
                   height: 54,
-                  child: FilledButton(
+                  child: ElevatedButton(
                     onPressed: login,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
                     child: const Text(
-                      'دخول',
+                      'تسجيل الدخول',
                       style: TextStyle(
-                        fontSize: 17,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 14),
+
+                const SizedBox(height: 16),
+
                 TextButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text(
-                          'إنشاء الحساب الحقيقي سنضيفه في المرحلة القادمة 🚀',
-                        ),
+                        content: Text('صفحة إنشاء الحساب ستضاف لاحقاً'),
                       ),
                     );
                   },
-                  child: const Text('إنشاء حساب جديد'),
+                  child: const Text(
+                    'إنشاء حساب جديد',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+
+                const SizedBox(height: 30),
+
+                const Text(
+                  'بالدخول إلى Meko أنت توافق على شروط الاستخدام',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
               ],
             ),
@@ -192,12 +206,7 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class HomePage extends StatefulWidget {
-  final String username;
-
-  const HomePage({
-    super.key,
-    required this.username,
-  });
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -208,28 +217,22 @@ class _HomePageState extends State<HomePage> {
 
   final List<Map<String, dynamic>> rooms = [
     {
-      'name': 'غرفة الأصدقاء',
-      'people': '24',
-      'speakers': '12',
-      'emoji': '🎙️',
+      'title': 'غرفة الأصدقاء',
+      'speakers': 12,
+      'listeners': 24,
+      'icon': Icons.people,
     },
     {
-      'name': 'موسيقى وسهر',
-      'people': '31',
-      'speakers': '8',
-      'emoji': '🎵',
+      'title': 'موسيقى وسهر',
+      'speakers': 8,
+      'listeners': 31,
+      'icon': Icons.music_note,
     },
     {
-      'name': 'تعرف ودردشة',
-      'people': '18',
-      'speakers': '6',
-      'emoji': '💬',
-    },
-    {
-      'name': 'سهرة Meko',
-      'people': '42',
-      'speakers': '10',
-      'emoji': '🔥',
+      'title': 'تعرف ودردشة',
+      'speakers': 6,
+      'listeners': 18,
+      'icon': Icons.chat,
     },
   ];
 
@@ -241,23 +244,120 @@ class _HomePageState extends State<HomePage> {
           'Meko',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 25,
           ),
         ),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.notifications_none),
+            icon: const Icon(Icons.notifications_outlined),
           ),
         ],
       ),
-      body: IndexedStack(
-        index: currentIndex,
+      body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          homePage(),
-          discoverPage(),
-          createPage(),
-          profilePage(),
+          const Text(
+            'الغرف الصوتية',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          const Text(
+            'ادخل غرفة وابدأ الدردشة مع الآخرين',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 15,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          for (final room in rooms)
+            Card(
+              margin: const EdgeInsets.only(bottom: 14),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'دخلت ${room['title']}',
+                      ),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 58,
+                        height: 58,
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Icon(
+                          room['icon'],
+                          color: Colors.deepPurple,
+                          size: 30,
+                        ),
+                      ),
+
+                      const SizedBox(width: 14),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              room['title'],
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+
+                            const SizedBox(height: 8),
+
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.mic,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text('${room['speakers']} متحدث'),
+
+                                const SizedBox(width: 14),
+
+                                const Icon(
+                                  Icons.person,
+                                  size: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text('${room['listeners']} مستمع'),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 18,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -274,14 +374,9 @@ class _HomePageState extends State<HomePage> {
             label: 'الرئيسية',
           ),
           NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
-            label: 'اكتشف',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.add_circle_outline),
-            selectedIcon: Icon(Icons.add_circle),
-            label: 'إنشاء',
+            icon: Icon(Icons.search_outlined),
+            selectedIcon: Icon(Icons.search),
+            label: 'بحث',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
@@ -290,409 +385,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget homePage() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Text(
-          'أهلاً ${widget.username} 👋',
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'الغرف النشطة الآن 🔥',
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.65),
-          ),
-        ),
-        const SizedBox(height: 20),
-        ...rooms.map(
-          (room) => roomCard(room),
-        ),
-      ],
-    );
-  }
-
-  Widget roomCard(Map<String, dynamic> room) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VoiceRoom(room: room),
-            ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7C4DFF).withOpacity(0.18),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  room['emoji'],
-                  style: const TextStyle(fontSize: 28),
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      room['name'],
-                      style: const TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 7),
-                    Text(
-                      '${room['speakers']} متحدثين • ${room['people']} مستمع',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.6),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_left),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget discoverPage() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text(
-          'اكتشف 🔎',
-          style: TextStyle(
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 18),
-        TextField(
-          decoration: InputDecoration(
-            hintText: 'ابحث عن غرفة...',
-            prefixIcon: const Icon(Icons.search),
-            filled: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-          ),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'التصنيفات',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 14),
-        Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            category('🎵 موسيقى'),
-            category('💬 دردشة'),
-            category('❤️ تعارف'),
-            category('🎮 ألعاب'),
-            category('⚽ رياضة'),
-            category('😂 ترفيه'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget category(String text) {
-    return Chip(
-      label: Text(text),
-      padding: const EdgeInsets.all(8),
-    );
-  }
-
-  Widget createPage() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(
-            Icons.mic,
-            size: 80,
-            color: Color(0xFF9C6CFF),
-          ),
-          const SizedBox(height: 20),
-          const Text(
-            'إنشاء غرفة صوتية',
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: () {},
-            icon: const Icon(Icons.add),
-            label: const Text('إنشاء غرفة'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget profilePage() {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        const CircleAvatar(
-          radius: 48,
-          child: Icon(
-            Icons.person,
-            size: 52,
-          ),
-        ),
-        const SizedBox(height: 14),
-        Center(
-          child: Text(
-            widget.username,
-            style: const TextStyle(
-              fontSize: 23,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 25),
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Stat(number: '0', title: 'المتابعون'),
-            Stat(number: '0', title: 'أتابعهم'),
-            Stat(number: '0', title: 'الغرف'),
-          ],
-        ),
-        const SizedBox(height: 25),
-        const Card(
-          child: ListTile(
-            leading: Icon(Icons.star),
-            title: Text('النقاط'),
-            trailing: Text(
-              '0',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class Stat extends StatelessWidget {
-  final String number;
-  final String title;
-
-  const Stat({
-    super.key,
-    required this.number,
-    required this.title,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          number,
-          style: const TextStyle(
-            fontSize: 21,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          title,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.6),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class VoiceRoom extends StatefulWidget {
-  final Map<String, dynamic> room;
-
-  const VoiceRoom({
-    super.key,
-    required this.room,
-  });
-
-  @override
-  State<VoiceRoom> createState() => _VoiceRoomState();
-}
-
-class _VoiceRoomState extends State<VoiceRoom> {
-  bool micOn = false;
-  int likes = 126;
-
-  final List<String> messages = [
-    'أهلاً بالجميع 👋',
-    'شو الأخبار؟ ❤️',
-    'أجواء حلوة اليوم 🔥',
-    'مين جديد بالغرفة؟',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.room['name']),
-      ),
-      body: Column(
-        children: [
-          const SizedBox(height: 18),
-          Text(
-            widget.room['emoji'],
-            style: const TextStyle(fontSize: 55),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '${widget.room['people']} شخص داخل الغرفة',
-          ),
-          const SizedBox(height: 25),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              speaker('أحمد', '🧑🏻', true),
-              speaker('سارة', '👩🏻', false),
-              speaker('محمد', '👨🏻', false),
-              speaker('ليان', '👩🏻', true),
-            ],
-          ),
-          const SizedBox(height: 25),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Color(0xFF10121C),
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(24),
-                ),
-              ),
-              child: ListView.builder(
-                itemCount: messages.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Text(
-                      messages[index],
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'اكتب رسالة...',
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      likes++;
-                    });
-                  },
-                  icon: const Icon(
-                    Icons.favorite,
-                    color: Colors.pink,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      micOn = !micOn;
-                    });
-                  },
-                  icon: Icon(
-                    micOn ? Icons.mic : Icons.mic_off,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget speaker(
-    String name,
-    String emoji,
-    bool active,
-  ) {
-    return Column(
-      children: [
-        Container(
-          width: 62,
-          height: 62,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: active
-                  ? const Color(0xFF9C6CFF)
-                  : Colors.transparent,
-              width: 3,
-            ),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            emoji,
-            style: const TextStyle(fontSize: 30),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(name),
-      ],
     );
   }
 }
