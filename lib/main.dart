@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 void main() {
@@ -20,55 +21,50 @@ class MekoApp extends StatelessWidget {
           seedColor: const Color(0xFF8B5CF6),
           brightness: Brightness.dark,
         ),
-        fontFamily: 'Arial',
       ),
-      home: const MekoHome(),
+      home: const HomePage(),
     );
   }
 }
 
-class MekoHome extends StatefulWidget {
-  const MekoHome({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<MekoHome> createState() => _MekoHomeState();
+  State<HomePage> createState() => _HomePageState();
 }
 
-class _MekoHomeState extends State<MekoHome> {
-  int currentIndex = 0;
+class _HomePageState extends State<HomePage> {
+  int index = 0;
 
   final List<Map<String, dynamic>> rooms = [
     {
-      'title': 'ليالي Meko',
-      'subtitle': 'سهر وضحك وتعارف',
+      'name': 'ليالي Meko',
+      'info': 'سهر وضحك وتعارف',
       'people': 328,
-      'speakers': 8,
-      'icon': Icons.nightlife_rounded,
       'color': Color(0xFF8B5CF6),
+      'icon': Icons.nightlife_rounded,
     },
     {
-      'title': 'Meko Music',
-      'subtitle': 'موسيقى وأجواء جميلة 🎵',
+      'name': 'Meko Music',
+      'info': 'موسيقى وأجواء جميلة 🎵',
       'people': 241,
-      'speakers': 6,
-      'icon': Icons.music_note_rounded,
       'color': Color(0xFFEC4899),
+      'icon': Icons.music_note_rounded,
     },
     {
-      'title': 'تعرف ودردشة',
-      'subtitle': 'ناس جديدة وسوالف جديدة',
+      'name': 'تعرف ودردشة',
+      'info': 'ناس جديدة وسوالف جديدة',
       'people': 187,
-      'speakers': 5,
-      'icon': Icons.forum_rounded,
       'color': Color(0xFF06B6D4),
+      'icon': Icons.forum_rounded,
     },
     {
-      'title': 'جلسة الأصدقاء',
-      'subtitle': 'خلينا نسولف ❤️',
+      'name': 'جلسة الأصدقاء',
+      'info': 'خلينا نسولف ❤️',
       'people': 96,
-      'speakers': 4,
-      'icon': Icons.people_alt_rounded,
       'color': Color(0xFFF97316),
+      'icon': Icons.people_alt_rounded,
     },
   ];
 
@@ -77,49 +73,48 @@ class _MekoHomeState extends State<MekoHome> {
     return Scaffold(
       body: SafeArea(
         child: IndexedStack(
-          index: currentIndex,
+          index: index,
           children: [
-            _homePage(),
-            _discoverPage(),
-            _createPage(),
-            _notificationsPage(),
-            _profilePage(),
+            home(),
+            discover(),
+            createRoom(),
+            notifications(),
+            profile(),
           ],
         ),
       ),
       bottomNavigationBar: NavigationBar(
         backgroundColor: const Color(0xFF0D0F1D),
-        indicatorColor: const Color(0xFF34205F),
-        selectedIndex: currentIndex,
-        onDestinationSelected: (index) {
+        selectedIndex: index,
+        onDestinationSelected: (value) {
           setState(() {
-            currentIndex = index;
+            index = value;
           });
         },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
+            selectedIcon: Icon(Icons.home),
             label: 'الرئيسية',
           ),
           NavigationDestination(
             icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore_rounded),
+            selectedIcon: Icon(Icons.explore),
             label: 'اكتشف',
           ),
           NavigationDestination(
-            icon: Icon(Icons.add_circle_outline_rounded),
-            selectedIcon: Icon(Icons.add_circle_rounded),
+            icon: Icon(Icons.add_circle_outline),
+            selectedIcon: Icon(Icons.add_circle),
             label: 'إنشاء',
           ),
           NavigationDestination(
-            icon: Icon(Icons.notifications_none_rounded),
-            selectedIcon: Icon(Icons.notifications_rounded),
+            icon: Icon(Icons.notifications_none),
+            selectedIcon: Icon(Icons.notifications),
             label: 'الإشعارات',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
+            icon: Icon(Icons.person_outline),
+            selectedIcon: Icon(Icons.person),
             label: 'حسابي',
           ),
         ],
@@ -127,210 +122,142 @@ class _MekoHomeState extends State<MekoHome> {
     );
   }
 
-  Widget _homePage() {
-    return CustomScrollView(
-      slivers: [
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 18, 5),
-            child: Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        Color(0xFF8B5CF6),
-                        Color(0xFFEC4899),
-                      ],
-                    ),
-                  ),
-                  child: const Icon(
-                    Icons.person_rounded,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                const Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'أهلًا بك 👋',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white54,
-                        ),
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Meko',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                _circleButton(Icons.search_rounded),
-                const SizedBox(width: 8),
-                _circleButton(Icons.mail_outline_rounded),
-              ],
-            ),
-          ),
-        ),
-
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Container(
-              height: 205,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+  Widget home() {
+    return ListView(
+      padding: const EdgeInsets.all(18),
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 50,
+              height: 50,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
                   colors: [
-                    Color(0xFF4C1D95),
-                    Color(0xFF7C3AED),
-                    Color(0xFFDB2777),
+                    Color(0xFF8B5CF6),
+                    Color(0xFFEC4899),
                   ],
                 ),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color(0x55341263),
-                    blurRadius: 25,
-                    offset: Offset(0, 10),
-                  ),
-                ],
               ),
-              child: Stack(
+              child: const Icon(Icons.person),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Positioned(
-                    right: -25,
-                    top: -35,
-                    child: Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.08),
-                      ),
+                  Text(
+                    'أهلًا بك 👋',
+                    style: TextStyle(
+                      color: Colors.white54,
                     ),
                   ),
-                  Positioned(
-                    right: 25,
-                    bottom: -45,
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.06),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(22),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          '🎙️  Meko Voice',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        const Text(
-                          'صوتك له مكان هنا',
-                          style: TextStyle(
-                            fontSize: 27,
-                            fontWeight: FontWeight.w900,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        const Text(
-                          'ادخل غرفة، تعرف على ناس\nواستمتع بالوقت.',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.white70,
-                            height: 1.4,
-                          ),
-                        ),
-                        const Spacer(),
-                        FilledButton(
-                          onPressed: () {
-                            setState(() {
-                              currentIndex = 1;
-                            });
-                          },
-                          style: FilledButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: const Color(0xFF6D28D9),
-                          ),
-                          child: const Text(
-                            'اكتشف الآن',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Meko',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
             ),
-          ),
+            circleButton(Icons.search),
+            const SizedBox(width: 8),
+            circleButton(Icons.mail_outline),
+          ],
         ),
 
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Row(
-              children: [
-                const Text(
-                  '🔥 الغرف المباشرة',
-                  style: TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      currentIndex = 1;
-                    });
-                  },
-                  child: const Text('عرض الكل'),
-                ),
+        const SizedBox(height: 20),
+
+        Container(
+          height: 205,
+          padding: const EdgeInsets.all(22),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            gradient: const LinearGradient(
+              colors: [
+                Color(0xFF4C1D95),
+                Color(0xFF7C3AED),
+                Color(0xFFDB2777),
               ],
             ),
           ),
-        ),
-
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(18, 8, 18, 20),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                return _roomCard(rooms[index]);
-              },
-              childCount: rooms.length,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '🎙️ Meko Voice',
+                style: TextStyle(
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                'صوتك له مكان هنا',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'ادخل غرفة وتعرف على ناس جديدة',
+                style: TextStyle(
+                  color: Colors.white70,
+                ),
+              ),
+              const Spacer(),
+              FilledButton(
+                onPressed: () {
+                  setState(() {
+                    index = 1;
+                  });
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: const Color(0xFF6D28D9),
+                ),
+                child: const Text('اكتشف الآن'),
+              ),
+            ],
           ),
         ),
+
+        const SizedBox(height: 25),
+
+        Row(
+          children: [
+            const Text(
+              '🔥 الغرف المباشرة',
+              style: TextStyle(
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Spacer(),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  index = 1;
+                });
+              },
+              child: const Text('عرض الكل'),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 8),
+
+        ...rooms.map((room) {
+          return roomCard(room);
+        }),
       ],
     );
   }
 
-  Widget _circleButton(IconData icon) {
+  Widget circleButton(IconData icon) {
     return Container(
       width: 44,
       height: 44,
@@ -338,11 +265,11 @@ class _MekoHomeState extends State<MekoHome> {
         color: const Color(0xFF141727),
         borderRadius: BorderRadius.circular(15),
       ),
-      child: Icon(icon, size: 21),
+      child: Icon(icon),
     );
   }
 
-  Widget _roomCard(Map<String, dynamic> room) {
+  Widget roomCard(Map<String, dynamic> room) {
     final Color color = room['color'] as Color;
 
     return GestureDetector(
@@ -350,70 +277,59 @@ class _MekoHomeState extends State<MekoHome> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => VoiceRoomPage(room: room),
+            builder: (context) {
+              return VoiceRoom(
+                room: room,
+              );
+            },
           ),
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 13),
+        margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: const Color(0xFF111423),
           borderRadius: BorderRadius.circular(23),
           border: Border.all(
-            color: color.withOpacity(0.20),
+            color: color.withOpacity(0.25),
           ),
         ),
         child: Row(
           children: [
-            Stack(
-              children: [
-                Container(
-                  width: 65,
-                  height: 65,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    gradient: LinearGradient(
-                      colors: [
-                        color,
-                        color.withOpacity(0.45),
-                      ],
-                    ),
-                  ),
-                  child: Icon(
-                    room['icon'] as IconData,
-                    size: 31,
-                  ),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(19),
+                gradient: LinearGradient(
+                  colors: [
+                    color,
+                    color.withOpacity(0.45),
+                  ],
                 ),
-                Positioned(
-                  right: -2,
-                  top: -2,
-                  child: Container(
-                    width: 13,
-                    height: 13,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.greenAccent,
-                    ),
-                  ),
-                ),
-              ],
+              ),
+              child: Icon(
+                room['icon'] as IconData,
+                size: 30,
+              ),
             ),
             const SizedBox(width: 13),
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
                   Text(
-                    room['title'] as String,
+                    room['name'] as String,
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
                   Text(
-                    room['subtitle'] as String,
+                    room['info'] as String,
                     style: const TextStyle(
                       color: Colors.white54,
                       fontSize: 12,
@@ -423,30 +339,30 @@ class _MekoHomeState extends State<MekoHome> {
                   Row(
                     children: [
                       const Icon(
-                        Icons.people_alt_rounded,
+                        Icons.people,
                         size: 15,
                         color: Colors.white54,
                       ),
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 5),
                       Text(
                         '${room['people']} موجود',
                         style: const TextStyle(
-                          fontSize: 11,
                           color: Colors.white54,
+                          fontSize: 11,
                         ),
                       ),
                       const SizedBox(width: 12),
                       const Icon(
-                        Icons.mic_rounded,
+                        Icons.mic,
                         size: 15,
                         color: Colors.white54,
                       ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${room['speakers']} متحدث',
-                        style: const TextStyle(
-                          fontSize: 11,
+                      const SizedBox(width: 5),
+                      const Text(
+                        'متحدثون',
+                        style: TextStyle(
                           color: Colors.white54,
+                          fontSize: 11,
                         ),
                       ),
                     ],
@@ -455,8 +371,8 @@ class _MekoHomeState extends State<MekoHome> {
               ),
             ),
             const Icon(
-              Icons.chevron_left_rounded,
-              color: Colors.white30,
+              Icons.chevron_left,
+              color: Colors.white38,
             ),
           ],
         ),
@@ -464,11 +380,10 @@ class _MekoHomeState extends State<MekoHome> {
     );
   }
 
-  Widget _discoverPage() {
+  Widget discover() {
     return ListView(
       padding: const EdgeInsets.all(18),
       children: [
-        const SizedBox(height: 5),
         const Text(
           'اكتشف ✨',
           style: TextStyle(
@@ -476,27 +391,24 @@ class _MekoHomeState extends State<MekoHome> {
             fontWeight: FontWeight.w900,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 6),
         const Text(
-          'اختار جوّك وادخل المكان اللي يعجبك',
+          'اختار الغرفة المناسبة لك',
           style: TextStyle(
             color: Colors.white54,
           ),
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 20),
 
-        SizedBox(
-          height: 48,
-          child: TextField(
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: const Color(0xFF141727),
-              hintText: 'ابحث عن غرفة أو شخص...',
-              prefixIcon: const Icon(Icons.search_rounded),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(17),
-                borderSide: BorderSide.none,
-              ),
+        TextField(
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: const Color(0xFF141727),
+            hintText: 'ابحث عن غرفة...',
+            prefixIcon: const Icon(Icons.search),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(17),
+              borderSide: BorderSide.none,
             ),
           ),
         ),
@@ -514,15 +426,15 @@ class _MekoHomeState extends State<MekoHome> {
         const SizedBox(height: 12),
 
         Wrap(
-          spacing: 9,
-          runSpacing: 9,
+          spacing: 8,
+          runSpacing: 8,
           children: [
-            _category('🎵 موسيقى'),
-            _category('😂 ترفيه'),
-            _category('❤️ تعارف'),
-            _category('🎮 ألعاب'),
-            _category('⚽ رياضة'),
-            _category('🌙 سهر'),
+            category('🎵 موسيقى'),
+            category('😂 ترفيه'),
+            category('❤️ تعارف'),
+            category('🎮 ألعاب'),
+            category('⚽ رياضة'),
+            category('🌙 سهر'),
           ],
         ),
 
@@ -538,14 +450,14 @@ class _MekoHomeState extends State<MekoHome> {
 
         const SizedBox(height: 12),
 
-        ...rooms.map(
-          (room) => _roomCard(room),
-        ),
+        ...rooms.map((room) {
+          return roomCard(room);
+        }),
       ],
     );
   }
 
-  Widget _category(String text) {
+  Widget category(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: 15,
@@ -554,20 +466,12 @@ class _MekoHomeState extends State<MekoHome> {
       decoration: BoxDecoration(
         color: const Color(0xFF141727),
         borderRadius: BorderRadius.circular(17),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.05),
-        ),
       ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-        ),
-      ),
+      child: Text(text),
     );
   }
 
-  Widget _createPage() {
+  Widget createRoom() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(25),
@@ -587,7 +491,7 @@ class _MekoHomeState extends State<MekoHome> {
                 ),
               ),
               child: const Icon(
-                Icons.mic_rounded,
+                Icons.mic,
                 size: 55,
               ),
             ),
@@ -601,26 +505,43 @@ class _MekoHomeState extends State<MekoHome> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'ابدأ غرفتك الخاصة واجمع أصحابك\nوتكلموا واستمتعوا مع بعض.',
+              'ابدأ غرفة خاصة بك واجمع أصحابك',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white54,
-                height: 1.6,
               ),
             ),
             const SizedBox(height: 28),
             SizedBox(
               width: double.infinity,
-              height: 56,
+              height: 55,
               child: FilledButton.icon(
-                onPressed: _showCreateRoomDialog,
-                icon: const Icon(Icons.add_rounded),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text(
+                          'غرفة جديدة 🎙️',
+                        ),
+                        content: const Text(
+                          'إنشاء الغرف الحقيقي سنفعله مع السيرفر.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('حسنًا'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                icon: const Icon(Icons.add),
                 label: const Text(
                   'إنشاء غرفة جديدة',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
                 ),
               ),
             ),
@@ -630,48 +551,7 @@ class _MekoHomeState extends State<MekoHome> {
     );
   }
 
-  void _showCreateRoomDialog() {
-    final controller = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF15182A),
-          title: const Text('إنشاء غرفة 🎙️'),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'اسم الغرفة',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: const Text('إلغاء'),
-            ),
-            FilledButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'سيتم تفعيل إنشاء الغرف الحقيقي في المرحلة القادمة 🔥',
-                    ),
-                  ),
-                );
-              },
-              child: const Text('إنشاء'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _notificationsPage() {
+  Widget notifications() {
     return ListView(
       padding: const EdgeInsets.all(18),
       children: [
@@ -684,4 +564,213 @@ class _MekoHomeState extends State<MekoHome> {
           ),
         ),
         const SizedBox(height: 20),
-        _
+        notification(
+          Icons.favorite,
+          'أعجب شخص بمنشورك',
+          'منذ 5 دقائق',
+        ),
+        notification(
+          Icons.person_add,
+          'لديك متابع جديد',
+          'منذ 20 دقيقة',
+        ),
+        notification(
+          Icons.mic,
+          'بدأت غرفة جديدة',
+          'منذ ساعة',
+        ),
+        notification(
+          Icons.card_giftcard,
+          'وصلتك هدية 🎁',
+          'منذ ساعتين',
+        ),
+      ],
+    );
+  }
+
+  Widget notification(
+    IconData icon,
+    String title,
+    String time,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111423),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: const Color(0xFF292044),
+            child: Icon(icon),
+          ),
+          const SizedBox(width: 13),
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                Text(title),
+                const SizedBox(height: 4),
+                Text(
+                  time,
+                  style: const TextStyle(
+                    color: Colors.white38,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget profile() {
+    return ListView(
+      padding: const EdgeInsets.all(18),
+      children: [
+        const SizedBox(height: 20),
+        Center(
+          child: Container(
+            width: 105,
+            height: 105,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  Color(0xFF8B5CF6),
+                  Color(0xFFEC4899),
+                ],
+              ),
+            ),
+            child: const Icon(
+              Icons.person,
+              size: 55,
+            ),
+          ),
+        ),
+        const SizedBox(height: 15),
+        const Center(
+          child: Text(
+            'مستخدم Meko',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+        ),
+        const SizedBox(height: 5),
+        const Center(
+          child: Text(
+            '@meko_user',
+            style: TextStyle(
+              color: Colors.white54,
+            ),
+          ),
+        ),
+        const SizedBox(height: 25),
+
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF111423),
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: const Row(
+            mainAxisAlignment:
+                MainAxisAlignment.spaceEvenly,
+            children: [
+              Stat(
+                number: '0',
+                title: 'المتابعون',
+              ),
+              Stat(
+                number: '0',
+                title: 'المتابَعون',
+              ),
+              Stat(
+                number: '0',
+                title: 'الغرف',
+              ),
+              Stat(
+                number: '0',
+                title: 'النقاط',
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        profileButton(
+          Icons.edit,
+          'تعديل الملف الشخصي',
+        ),
+        profileButton(
+          Icons.card_giftcard,
+          'الهدايا والجوائز',
+        ),
+        profileButton(
+          Icons.star,
+          'المستوى والنقاط',
+        ),
+        profileButton(
+          Icons.settings,
+          'الإعدادات',
+        ),
+      ],
+    );
+  }
+
+  Widget profileButton(
+    IconData icon,
+    String text,
+  ) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        tileColor: const Color(0xFF111423),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+        ),
+        leading: Icon(
+          icon,
+          color: const Color(0xFFA78BFA),
+        ),
+        title: Text(text),
+        trailing: const Icon(
+          Icons.chevron_left,
+          color: Colors.white38,
+        ),
+      ),
+    );
+  }
+}
+
+class Stat extends StatelessWidget {
+  final String number;
+  final String title;
+
+  const Stat({
+    super.key,
+    required this.number,
+    required this.title,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          number,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        
