@@ -6,11 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint('Firebase error: $e');
-  }
+  await Firebase.initializeApp();
 
   runApp(const MekoApp());
 }
