@@ -9,7 +9,7 @@ Future<void> main() async {
   try {
     await Firebase.initializeApp();
   } catch (e) {
-    debugPrint('Firebase initialization error: $e');
+    debugPrint('Firebase error: $e');
   }
 
   runApp(const MekoApp());
@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> login() async {
     if (emailController.text.trim().isEmpty ||
         passwordController.text.isEmpty) {
-      message('اكتب البريد الإلكتروني وكلمة المرور');
+      showMessage('اكتب الإيميل وكلمة المرور');
       return;
     }
 
@@ -73,9 +73,13 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } on FirebaseAuthException catch (e) {
-      message(e.message ?? 'فشل تسجيل الدخول');
+      showMessage(
+        'Firebase: ${e.code}\n${e.message ?? ''}',
+      );
     } catch (e) {
-      message('حدث خطأ أثناء تسجيل الدخول');
+      showMessage(
+        'خطأ: $e',
+      );
     }
 
     if (mounted) {
@@ -85,9 +89,12 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void message(String text) {
+  void showMessage(String text) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text)),
+      SnackBar(
+        content: Text(text),
+        duration: const Duration(seconds: 6),
+      ),
     );
   }
 
@@ -206,7 +213,9 @@ class _RegisterPageState extends State<RegisterPage> {
     if (nameController.text.trim().isEmpty ||
         emailController.text.trim().isEmpty ||
         passwordController.text.length < 6) {
-      message('أدخل الاسم والإيميل وكلمة مرور 6 أحرف على الأقل');
+      showMessage(
+        'اكتب الاسم والإيميل وكلمة مرور من 6 أحرف على الأقل',
+      );
       return;
     }
 
@@ -248,9 +257,13 @@ class _RegisterPageState extends State<RegisterPage> {
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      message(e.message ?? 'تعذر إنشاء الحساب');
+      showMessage(
+        'Firebase: ${e.code}\n${e.message ?? ''}',
+      );
     } catch (e) {
-      message('حدث خطأ أثناء إنشاء الحساب');
+      showMessage(
+        'خطأ: $e',
+      );
     }
 
     if (mounted) {
@@ -260,9 +273,12 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
-  void message(String text) {
+  void showMessage(String text) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(text)),
+      SnackBar(
+        content: Text(text),
+        duration: const Duration(seconds: 6),
+      ),
     );
   }
 
@@ -415,7 +431,9 @@ class HomePage extends StatelessWidget {
                 contentPadding: const EdgeInsets.all(16),
                 leading: CircleAvatar(
                   radius: 28,
-                  child: Icon(room['icon'] as IconData),
+                  child: Icon(
+                    room['icon'] as IconData,
+                  ),
                 ),
                 title: Text(
                   room['title'] as String,
