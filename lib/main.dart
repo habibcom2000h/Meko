@@ -19,15 +19,9 @@ Future<void> main() async {
 
     runApp(const MekoApp());
   } catch (e) {
-    runApp(
-      FirebaseErrorApp(error: e.toString()),
-    );
+    runApp(FirebaseErrorApp(error: e.toString()));
   }
 }
-
-// ===============================
-// Firebase Error Page
-// ===============================
 
 class FirebaseErrorApp extends StatelessWidget {
   final String error;
@@ -57,10 +51,6 @@ class FirebaseErrorApp extends StatelessWidget {
   }
 }
 
-// ===============================
-// Meko App
-// ===============================
-
 class MekoApp extends StatelessWidget {
   const MekoApp({super.key});
 
@@ -80,9 +70,7 @@ class MekoApp extends StatelessWidget {
   }
 }
 
-// ===============================
-// Login Page
-// ===============================
+// ==================== LOGIN ====================
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -173,9 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                   Icons.mic,
                   size: 85,
                 ),
-
                 const SizedBox(height: 15),
-
                 const Text(
                   'Meko',
                   style: TextStyle(
@@ -183,31 +169,22 @@ class _LoginPageState extends State<LoginPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 const Text(
                   'غرف صوتية ودردشة',
-                  style: TextStyle(
-                    fontSize: 17,
-                  ),
+                  style: TextStyle(fontSize: 17),
                 ),
-
                 const SizedBox(height: 35),
-
                 TextField(
                   controller: emailController,
-                  keyboardType:
-                      TextInputType.emailAddress,
+                  keyboardType: TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: 'البريد الإلكتروني',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
                   ),
                 ),
-
                 const SizedBox(height: 15),
-
                 TextField(
                   controller: passwordController,
                   obscureText: true,
@@ -217,9 +194,7 @@ class _LoginPageState extends State<LoginPage> {
                     prefixIcon: Icon(Icons.lock),
                   ),
                 ),
-
                 const SizedBox(height: 20),
-
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -229,20 +204,15 @@ class _LoginPageState extends State<LoginPage> {
                         ? const SizedBox(
                             width: 24,
                             height: 24,
-                            child:
-                                CircularProgressIndicator(),
+                            child: CircularProgressIndicator(),
                           )
                         : const Text(
                             'تسجيل الدخول',
-                            style: TextStyle(
-                              fontSize: 17,
-                            ),
+                            style: TextStyle(fontSize: 17),
                           ),
                   ),
                 ),
-
                 const SizedBox(height: 12),
-
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -253,16 +223,13 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    const RegisterPage(),
+                                builder: (_) => const RegisterPage(),
                               ),
                             );
                           },
                     child: const Text(
                       'إنشاء حساب جديد',
-                      style: TextStyle(
-                        fontSize: 17,
-                      ),
+                      style: TextStyle(fontSize: 17),
                     ),
                   ),
                 ),
@@ -275,16 +242,13 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// ===============================
-// Register Page
-// ===============================
+// ==================== REGISTER ====================
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() =>
-      _RegisterPageState();
+  State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
@@ -321,7 +285,6 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      // إنشاء الحساب في Firebase Authentication
       final result = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
         email: email,
@@ -334,13 +297,9 @@ class _RegisterPageState extends State<RegisterPage> {
       final user = result.user;
 
       if (user == null) {
-        throw Exception(
-          'لم يتم إنشاء المستخدم',
-        );
+        throw Exception('لم يتم إنشاء المستخدم');
       }
 
-      // نحاول حفظ معلومات المستخدم في Firestore.
-      // إذا حدثت مشكلة، لا نوقف إنشاء الحساب.
       try {
         await FirebaseFirestore.instance
             .collection('users')
@@ -348,20 +307,17 @@ class _RegisterPageState extends State<RegisterPage> {
             .set({
           'name': name,
           'email': email,
-          'createdAt':
-              FieldValue.serverTimestamp(),
-        }).timeout(
+          'createdAt': FieldValue.serverTimestamp(),
+        })
+            .timeout(
           const Duration(seconds: 10),
         );
       } catch (e) {
-        debugPrint(
-          'Firestore error: $e',
-        );
+        debugPrint('Firestore error: $e');
       }
 
       if (!mounted) return;
 
-      // الدخول مباشرة إلى الصفحة الرئيسية
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -374,23 +330,19 @@ class _RegisterPageState extends State<RegisterPage> {
 
       switch (e.code) {
         case 'email-already-in-use':
-          message =
-              'هذا الإيميل مستخدم من قبل';
+          message = 'هذا الإيميل مستخدم من قبل';
           break;
 
         case 'invalid-email':
-          message =
-              'الإيميل غير صحيح';
+          message = 'الإيميل غير صحيح';
           break;
 
         case 'weak-password':
-          message =
-              'كلمة المرور ضعيفة';
+          message = 'كلمة المرور ضعيفة';
           break;
 
         case 'network-request-failed':
-          message =
-              'لا يوجد اتصال جيد بالإنترنت';
+          message = 'لا يوجد اتصال جيد بالإنترنت';
           break;
 
         default:
@@ -431,84 +383,62 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'إنشاء حساب',
-        ),
+        title: const Text('إنشاء حساب'),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
               const SizedBox(height: 25),
-
               const Icon(
                 Icons.person_add,
                 size: 75,
               ),
-
               const SizedBox(height: 25),
-
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
                   labelText: 'الاسم',
                   border: OutlineInputBorder(),
-                  prefixIcon:
-                      Icon(Icons.person),
+                  prefixIcon: Icon(Icons.person),
                 ),
               ),
-
               const SizedBox(height: 15),
-
               TextField(
                 controller: emailController,
-                keyboardType:
-                    TextInputType.emailAddress,
+                keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  labelText:
-                      'البريد الإلكتروني',
+                  labelText: 'البريد الإلكتروني',
                   border: OutlineInputBorder(),
-                  prefixIcon:
-                      Icon(Icons.email),
+                  prefixIcon: Icon(Icons.email),
                 ),
               ),
-
               const SizedBox(height: 15),
-
               TextField(
                 controller: passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText:
-                      'كلمة المرور',
+                  labelText: 'كلمة المرور',
                   border: OutlineInputBorder(),
-                  prefixIcon:
-                      Icon(Icons.lock),
+                  prefixIcon: Icon(Icons.lock),
                 ),
               ),
-
               const SizedBox(height: 25),
-
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: FilledButton(
-                  onPressed:
-                      loading ? null : register,
+                  onPressed: loading ? null : register,
                   child: loading
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child:
-                              CircularProgressIndicator(),
+                          child: CircularProgressIndicator(),
                         )
                       : const Text(
                           'إنشاء الحساب',
-                          style: TextStyle(
-                            fontSize: 17,
-                          ),
+                          style: TextStyle(fontSize: 17),
                         ),
                 ),
               ),
@@ -520,43 +450,16 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 }
 
-// ===============================
-// Home Page
-// ===============================
+// ==================== HOME ====================
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static const rooms = [
-    {
-      'title': 'غرفة الأصدقاء',
-      'speakers': 12,
-      'listeners': 24,
-      'icon': Icons.people,
-    },
-    {
-      'title': 'موسيقى وسهر',
-      'speakers': 8,
-      'listeners': 31,
-      'icon': Icons.music_note,
-    },
-    {
-      'title': 'تعرف ودردشة',
-      'speakers': 6,
-      'listeners': 18,
-      'icon': Icons.chat,
-    },
-  ];
-
-  Future<void> logout(
-    BuildContext context,
-  ) async {
+  Future<void> logout(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut();
     } catch (e) {
-      debugPrint(
-        'Logout error: $e',
-      );
+      debugPrint('Logout error: $e');
     }
 
     if (!context.mounted) return;
@@ -584,83 +487,115 @@ class HomePage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () => logout(context),
-            icon: const Icon(
-              Icons.logout,
-            ),
+            icon: const Icon(Icons.logout),
           ),
         ],
       ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('rooms')
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState ==
+              ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const Text(
-            'الغرف الصوتية',
-            style: TextStyle(
-              fontSize: 25,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 15),
-
-          ...rooms.map(
-            (room) => Card(
-              margin:
-                  const EdgeInsets.only(
-                bottom: 12,
+          if (snapshot.hasError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  'حدث خطأ في تحميل الغرف:\n\n${snapshot.error}',
+                  textAlign: TextAlign.center,
+                ),
               ),
-              child: ListTile(
-                contentPadding:
-                    const EdgeInsets.all(16),
+            );
+          }
 
-                leading: CircleAvatar(
-                  radius: 28,
-                  child: Icon(
-                    room['icon']
-                        as IconData,
-                  ),
+          final rooms = snapshot.data?.docs ?? [];
+
+          if (rooms.isEmpty) {
+            return const Center(
+              child: Text(
+                'لا توجد غرف حالياً',
+                style: TextStyle(fontSize: 18),
+              ),
+            );
+          }
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const Text(
+                'الغرف الصوتية',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+              const SizedBox(height: 15),
+              ...rooms.map(
+                (doc) {
+                  final data =
+                      doc.data() as Map<String, dynamic>;
 
-                title: Text(
-                  room['title'] as String,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight:
-                        FontWeight.bold,
-                  ),
-                ),
+                  final title =
+                      data['title']?.toString() ??
+                          'غرفة بدون اسم';
 
-                subtitle: Padding(
-                  padding:
-                      const EdgeInsets.only(
-                    top: 8,
-                  ),
-                  child: Text(
-                    '${room['speakers']} متحدث • '
-                    '${room['listeners']} مستمع',
-                  ),
-                ),
+                  final speakers =
+                      data['speakers']?.toString() ?? '0';
 
-                trailing: const Icon(
-                  Icons.arrow_forward_ios,
-                ),
+                  final listeners =
+                      data['listeners']?.toString() ?? '0';
 
-                onTap: () {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'الغرفة الصوتية قيد التطوير 🎙️',
+                  return Card(
+                    margin:
+                        const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      contentPadding:
+                          const EdgeInsets.all(16),
+                      leading: const CircleAvatar(
+                        radius: 28,
+                        child: Icon(Icons.mic),
                       ),
+                      title: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding:
+                            const EdgeInsets.only(top: 8),
+                        child: Text(
+                          '$speakers متحدث • $listeners مستمع',
+                        ),
+                      ),
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                      ),
+                      onTap: () {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'الغرفة الصوتية قيد التطوير 🎙️',
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        },
       ),
     );
   }
