@@ -9,10 +9,39 @@ Future<void> main() async {
   try {
     await Firebase.initializeApp();
   } catch (e) {
-    debugPrint('Firebase error: $e');
+    runApp(FirebaseErrorApp(error: e.toString()));
+    return;
   }
 
   runApp(const MekoApp());
+}
+
+class FirebaseErrorApp extends StatelessWidget {
+  final String error;
+
+  const FirebaseErrorApp({
+    super.key,
+    required this.error,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'تعذر تشغيل Firebase\n\n$error',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 18),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MekoApp extends StatelessWidget {
@@ -48,8 +77,10 @@ class _LoginPageState extends State<LoginPage> {
   bool loading = false;
 
   Future<void> login() async {
-    if (emailController.text.trim().isEmpty ||
-        passwordController.text.isEmpty) {
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (email.isEmpty || password.isEmpty) {
       showMessage('اكتب الإيميل وكلمة المرور');
       return;
     }
@@ -60,8 +91,8 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text,
+        email: email,
+        password: password,
       );
 
       if (!mounted) return;
@@ -156,7 +187,11 @@ class _LoginPageState extends State<LoginPage> {
                   child: FilledButton(
                     onPressed: loading ? null : login,
                     child: loading
-                        ? const CircularProgressIndicator()
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(),
+                          )
                         : const Text(
                             'تسجيل الدخول',
                             style: TextStyle(fontSize: 17),
@@ -208,9 +243,11 @@ class _RegisterPageState extends State<RegisterPage> {
   bool loading = false;
 
   Future<void> register() async {
-    if (nameController.text.trim().isEmpty ||
-        emailController.text.trim().isEmpty ||
-        passwordController.text.length < 6) {
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
+    if (name.isEmpty || email.isEmpty || password.length < 6) {
       showMessage(
         'اكتب الاسم والإيميل وكلمة مرور من 6 أحرف على الأقل',
       );
@@ -224,25 +261,21 @@ class _RegisterPageState extends State<RegisterPage> {
     try {
       final result =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text,
+        email: email,
+        password: password,
       );
 
       final user = result.user;
 
       if (user != null) {
-        try {
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .set({
-            'name': nameController.text.trim(),
-            'email': emailController.text.trim(),
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-        } catch (e) {
-          debugPrint('Firestore error: $e');
-        }
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'name': name,
+          'email': email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
       }
 
       if (!mounted) return;
@@ -255,6 +288,10 @@ class _RegisterPageState extends State<RegisterPage> {
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
+      showMessage(
+        'Firebase: ${e.code}\n${e.message ?? ''}',
+      );
+    } on FirebaseException catch (e) {
       showMessage(
         'Firebase: ${e.code}\n${e.message ?? ''}',
       );
@@ -338,7 +375,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 child: FilledButton(
                   onPressed: loading ? null : register,
                   child: loading
-                      ? const CircularProgressIndicator()
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(),
+                        )
                       : const Text(
                           'إنشاء الحساب',
                           style: TextStyle(fontSize: 17),
