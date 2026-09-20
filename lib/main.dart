@@ -7,9 +7,21 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyAyD2OG9U2ygast19nU97iorST-OIhuvCI',
+        appId: '1:901776027185:android:e139298119cf7b42742f10',
+        messagingSenderId: '901776027185',
+        projectId: 'meko-ccf1c',
+        storageBucket: 'meko-ccf1c.firebasestorage.app',
+      ),
+    );
   } catch (e) {
-    runApp(FirebaseErrorApp(error: e.toString()));
+    runApp(
+      FirebaseErrorApp(
+        error: e.toString(),
+      ),
+    );
     return;
   }
 
