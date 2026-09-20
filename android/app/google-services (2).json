@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "901776027185",
+    "project_id": "meko-ccf1c",
+    "storage_bucket": "meko-ccf1c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901776027185:android:e139298119cf7b42742f10",
+        "android_client_info": {
+          "package_name": "com.meko.meko"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyD2OG9U2ygast19nU97iorST-OIhuvCI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
