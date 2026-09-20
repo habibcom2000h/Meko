@@ -16,17 +16,18 @@ Future<void> main() async {
         storageBucket: 'meko-ccf1c.firebasestorage.app',
       ),
     );
+
+    runApp(const MekoApp());
   } catch (e) {
     runApp(
-      FirebaseErrorApp(
-        error: e.toString(),
-      ),
+      FirebaseErrorApp(error: e.toString()),
     );
-    return;
   }
-
-  runApp(const MekoApp());
 }
+
+// ===============================
+// Firebase Error Page
+// ===============================
 
 class FirebaseErrorApp extends StatelessWidget {
   final String error;
@@ -56,6 +57,10 @@ class FirebaseErrorApp extends StatelessWidget {
   }
 }
 
+// ===============================
+// Meko App
+// ===============================
+
 class MekoApp extends StatelessWidget {
   const MekoApp({super.key});
 
@@ -74,6 +79,10 @@ class MekoApp extends StatelessWidget {
     );
   }
 }
+
+// ===============================
+// Login Page
+// ===============================
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -102,18 +111,23 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
         email: email,
         password: password,
+      )
+          .timeout(
+        const Duration(seconds: 20),
       );
 
       if (!mounted) return;
 
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (_) => const HomePage(),
         ),
+        (route) => false,
       );
     } on FirebaseAuthException catch (e) {
       showMessage(
@@ -159,7 +173,9 @@ class _LoginPageState extends State<LoginPage> {
                   Icons.mic,
                   size: 85,
                 ),
+
                 const SizedBox(height: 15),
+
                 const Text(
                   'Meko',
                   style: TextStyle(
@@ -167,22 +183,31 @@ class _LoginPageState extends State<LoginPage> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 8),
+
                 const Text(
                   'غرف صوتية ودردشة',
-                  style: TextStyle(fontSize: 17),
+                  style: TextStyle(
+                    fontSize: 17,
+                  ),
                 ),
+
                 const SizedBox(height: 35),
+
                 TextField(
                   controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType:
+                      TextInputType.emailAddress,
                   decoration: const InputDecoration(
                     labelText: 'البريد الإلكتروني',
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.email),
                   ),
                 ),
+
                 const SizedBox(height: 15),
+
                 TextField(
                   controller: passwordController,
                   obscureText: true,
@@ -192,7 +217,9 @@ class _LoginPageState extends State<LoginPage> {
                     prefixIcon: Icon(Icons.lock),
                   ),
                 ),
+
                 const SizedBox(height: 20),
+
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -202,15 +229,20 @@ class _LoginPageState extends State<LoginPage> {
                         ? const SizedBox(
                             width: 24,
                             height: 24,
-                            child: CircularProgressIndicator(),
+                            child:
+                                CircularProgressIndicator(),
                           )
                         : const Text(
                             'تسجيل الدخول',
-                            style: TextStyle(fontSize: 17),
+                            style: TextStyle(
+                              fontSize: 17,
+                            ),
                           ),
                   ),
                 ),
+
                 const SizedBox(height: 12),
+
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -221,13 +253,16 @@ class _LoginPageState extends State<LoginPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const RegisterPage(),
+                                builder: (_) =>
+                                    const RegisterPage(),
                               ),
                             );
                           },
                     child: const Text(
                       'إنشاء حساب جديد',
-                      style: TextStyle(fontSize: 17),
+                      style: TextStyle(
+                        fontSize: 17,
+                      ),
                     ),
                   ),
                 ),
@@ -240,11 +275,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
+// ===============================
+// Register Page
+// ===============================
+
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
   @override
-  State<RegisterPage> createState() => _RegisterPageState();
+  State<RegisterPage> createState() =>
+      _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
@@ -259,9 +299,19 @@ class _RegisterPageState extends State<RegisterPage> {
     final email = emailController.text.trim();
     final password = passwordController.text;
 
-    if (name.isEmpty || email.isEmpty || password.length < 6) {
+    if (name.isEmpty) {
+      showMessage('اكتب الاسم');
+      return;
+    }
+
+    if (email.isEmpty) {
+      showMessage('اكتب البريد الإلكتروني');
+      return;
+    }
+
+    if (password.length < 6) {
       showMessage(
-        'اكتب الاسم والإيميل وكلمة مرور من 6 أحرف على الأقل',
+        'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
       );
       return;
     }
@@ -271,27 +321,47 @@ class _RegisterPageState extends State<RegisterPage> {
     });
 
     try {
-      final result =
-          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      // إنشاء الحساب في Firebase Authentication
+      final result = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
         email: email,
         password: password,
+      )
+          .timeout(
+        const Duration(seconds: 20),
       );
 
       final user = result.user;
 
-      if (user != null) {
+      if (user == null) {
+        throw Exception(
+          'لم يتم إنشاء المستخدم',
+        );
+      }
+
+      // نحاول حفظ معلومات المستخدم في Firestore.
+      // إذا حدثت مشكلة، لا نوقف إنشاء الحساب.
+      try {
         await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
             .set({
           'name': name,
           'email': email,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+          'createdAt':
+              FieldValue.serverTimestamp(),
+        }).timeout(
+          const Duration(seconds: 10),
+        );
+      } catch (e) {
+        debugPrint(
+          'Firestore error: $e',
+        );
       }
 
       if (!mounted) return;
 
+      // الدخول مباشرة إلى الصفحة الرئيسية
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
@@ -300,13 +370,35 @@ class _RegisterPageState extends State<RegisterPage> {
         (route) => false,
       );
     } on FirebaseAuthException catch (e) {
-      showMessage(
-        'Firebase: ${e.code}\n${e.message ?? ''}',
-      );
-    } on FirebaseException catch (e) {
-      showMessage(
-        'Firebase: ${e.code}\n${e.message ?? ''}',
-      );
+      String message;
+
+      switch (e.code) {
+        case 'email-already-in-use':
+          message =
+              'هذا الإيميل مستخدم من قبل';
+          break;
+
+        case 'invalid-email':
+          message =
+              'الإيميل غير صحيح';
+          break;
+
+        case 'weak-password':
+          message =
+              'كلمة المرور ضعيفة';
+          break;
+
+        case 'network-request-failed':
+          message =
+              'لا يوجد اتصال جيد بالإنترنت';
+          break;
+
+        default:
+          message =
+              'Firebase: ${e.code}\n${e.message ?? ''}';
+      }
+
+      showMessage(message);
     } catch (e) {
       showMessage('خطأ: $e');
     }
@@ -339,62 +431,84 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('إنشاء حساب'),
+        title: const Text(
+          'إنشاء حساب',
+        ),
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
               const SizedBox(height: 25),
+
               const Icon(
                 Icons.person_add,
                 size: 75,
               ),
+
               const SizedBox(height: 25),
+
               TextField(
                 controller: nameController,
                 decoration: const InputDecoration(
                   labelText: 'الاسم',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person),
+                  prefixIcon:
+                      Icon(Icons.person),
                 ),
               ),
+
               const SizedBox(height: 15),
+
               TextField(
                 controller: emailController,
-                keyboardType: TextInputType.emailAddress,
+                keyboardType:
+                    TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  labelText: 'البريد الإلكتروني',
+                  labelText:
+                      'البريد الإلكتروني',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
+                  prefixIcon:
+                      Icon(Icons.email),
                 ),
               ),
+
               const SizedBox(height: 15),
+
               TextField(
                 controller: passwordController,
                 obscureText: true,
                 decoration: const InputDecoration(
-                  labelText: 'كلمة المرور',
+                  labelText:
+                      'كلمة المرور',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
+                  prefixIcon:
+                      Icon(Icons.lock),
                 ),
               ),
+
               const SizedBox(height: 25),
+
               SizedBox(
                 width: double.infinity,
                 height: 52,
                 child: FilledButton(
-                  onPressed: loading ? null : register,
+                  onPressed:
+                      loading ? null : register,
                   child: loading
                       ? const SizedBox(
                           width: 24,
                           height: 24,
-                          child: CircularProgressIndicator(),
+                          child:
+                              CircularProgressIndicator(),
                         )
                       : const Text(
                           'إنشاء الحساب',
-                          style: TextStyle(fontSize: 17),
+                          style: TextStyle(
+                            fontSize: 17,
+                          ),
                         ),
                 ),
               ),
@@ -405,6 +519,10 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
+
+// ===============================
+// Home Page
+// ===============================
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -430,11 +548,15 @@ class HomePage extends StatelessWidget {
     },
   ];
 
-  Future<void> logout(BuildContext context) async {
+  Future<void> logout(
+    BuildContext context,
+  ) async {
     try {
       await FirebaseAuth.instance.signOut();
     } catch (e) {
-      debugPrint('Logout error: $e');
+      debugPrint(
+        'Logout error: $e',
+      );
     }
 
     if (!context.mounted) return;
@@ -462,10 +584,13 @@ class HomePage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () => logout(context),
-            icon: const Icon(Icons.logout),
+            icon: const Icon(
+              Icons.logout,
+            ),
           ),
         ],
       ),
+
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -476,37 +601,55 @@ class HomePage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 15),
+
           ...rooms.map(
             (room) => Card(
-              margin: const EdgeInsets.only(bottom: 12),
+              margin:
+                  const EdgeInsets.only(
+                bottom: 12,
+              ),
               child: ListTile(
-                contentPadding: const EdgeInsets.all(16),
+                contentPadding:
+                    const EdgeInsets.all(16),
+
                 leading: CircleAvatar(
                   radius: 28,
                   child: Icon(
-                    room['icon'] as IconData,
+                    room['icon']
+                        as IconData,
                   ),
                 ),
+
                 title: Text(
                   room['title'] as String,
                   style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight:
+                        FontWeight.bold,
                   ),
                 ),
+
                 subtitle: Padding(
-                  padding: const EdgeInsets.only(top: 8),
+                  padding:
+                      const EdgeInsets.only(
+                    top: 8,
+                  ),
                   child: Text(
                     '${room['speakers']} متحدث • '
                     '${room['listeners']} مستمع',
                   ),
                 ),
+
                 trailing: const Icon(
                   Icons.arrow_forward_ios,
                 ),
+
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(
                     const SnackBar(
                       content: Text(
                         'الغرفة الصوتية قيد التطوير 🎙️',
