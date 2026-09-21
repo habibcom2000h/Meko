@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 
-const String agoraAppId = 'PUT_YOUR_AGORA_APP_ID_HERE';
+const String agoraAppId = '391d156ea0c446a9adc8efebe89d70b7';
 const String agoraTempToken = 'PUT_YOUR_TEMP_TOKEN_HERE';
 
 Future<void> main() async {
