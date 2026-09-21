@@ -1,18 +1,14 @@
-
 workflows:
   meko-android:
     name: Meko Android
+
     environment:
       flutter: stable
       java: 17
 
     scripts:
-      - name: Prepare project
+      - name: Get packages
         script: |
-          if [ ! -f android/gradlew ]; then
-            rm -rf android
-            flutter create --platforms=android --org com.meko --project-name meko .
-          fi
           flutter pub get
 
       - name: Build APK
