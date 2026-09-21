@@ -12,13 +12,12 @@ plugins {
     id "com.google.gms.google-services" version "4.4.2" apply false
 }
 
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-    }
+include ":app"
+
+def flutterSdkPath = System.getenv("FLUTTER_ROOT")
+
+if (flutterSdkPath == null || flutterSdkPath.isEmpty()) {
+    flutterSdkPath = "/opt/homebrew/share/flutter"
 }
 
-rootProject.name = "meko"
-include(":app")
+includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
