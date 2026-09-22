@@ -9,7 +9,9 @@ workflows:
     scripts:
       - name: Show Flutter version
         script: |
+          echo "===== FLUTTER VERSION ====="
           flutter --version
+          echo "===== FLUTTER DOCTOR ====="
           flutter doctor -v
 
       - name: Get packages
