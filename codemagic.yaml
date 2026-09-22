@@ -11,6 +11,10 @@ workflows:
         script: |
           flutter pub get
 
+      - name: Force Android DSL compatibility
+        script: |
+          echo "android.newDsl=false" >> android/gradle.properties
+
       - name: Build APK
         script: |
           flutter build apk --release
