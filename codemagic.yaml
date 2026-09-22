@@ -7,13 +7,14 @@ workflows:
       java: 17
 
     scripts:
+      - name: Show Flutter version
+        script: |
+          flutter --version
+          flutter doctor -v
+
       - name: Get packages
         script: |
           flutter pub get
-
-      - name: Force Android DSL compatibility
-        script: |
-          echo "android.newDsl=false" >> android/gradle.properties
 
       - name: Build APK
         script: |
