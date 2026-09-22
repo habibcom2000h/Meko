@@ -3,17 +3,10 @@ workflows:
     name: Meko Android
 
     environment:
-      flutter: stable
+      flutter: 3.41.0
       java: 17
 
     scripts:
-      - name: Show Flutter version
-        script: |
-          echo "===== FLUTTER VERSION ====="
-          flutter --version
-          echo "===== FLUTTER DOCTOR ====="
-          flutter doctor -v
-
       - name: Get packages
         script: |
           flutter pub get
