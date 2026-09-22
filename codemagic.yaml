@@ -11,6 +11,10 @@ workflows:
         script: |
           flutter pub get
 
+      - name: Disable Flutter Android auto-upgrade
+        script: |
+          flutter config --no-enable-swift-package-manager
+
       - name: Build APK
         script: |
           flutter build apk --release
