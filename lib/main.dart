@@ -539,7 +539,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-// ==================== الصفحة الرئيسية والغرف ====================
+// ==================== الصفحة الرئيسية ====================
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -554,9 +554,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'Meko',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -567,22 +565,9 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const CreateRoomPage(),
-            ),
-          );
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('إنشاء غرفة'),
-      ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
             .collection('rooms')
-            .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -596,9 +581,8 @@ class HomePage extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.all(24),
                 child: Text(
-                  'تعذر تحميل الغرف.\nتأكد من إعداد Firestore وقواعد الأمان.',
+                  'تعذر تحميل الغرف.\nتأكد من صلاحيات Firestore.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 17),
                 ),
               ),
             );
@@ -608,50 +592,61 @@ class HomePage extends StatelessWidget {
 
           if (rooms.isEmpty) {
             return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(24),
-                child: Text(
-                  'لا توجد غرف حالياً.\nأنشئ أول غرفة في Meko 🎙️',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 20),
-                ),
+              child: Text(
+                'لا توجد غرف حالياً',
+                style: TextStyle(fontSize: 20),
               ),
             );
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+            padding: const EdgeInsets.all(16),
             itemCount: rooms.length,
             itemBuilder: (context, index) {
-              final data = rooms[index].data();
+              final room = rooms[index];
+              final data = room.data();
 
-              final name = data['name'] ?? 'غرفة بدون اسم';
-              final description = data['description'] ?? '';
-              final ownerName = data['ownerName'] ?? 'مستخدم Meko';
-              final listeners = data['listeners'] ?? 0;
+              final title =
+                  data['title']?.toString() ?? 'غرفة Meko';
+
+              final speakers =
+                  data['speakers']?.toString() ?? '0';
+
+              final listeners =
+                  data['listeners']?.toString() ?? '0';
+
+              IconData icon = Icons.mic;
+
+              if (title.contains('موسيقى')) {
+                icon = Icons.music_note;
+              } else if (title.contains('تعرف') ||
+                  title.contains('دردشة')) {
+                icon = Icons.chat;
+              } else if (title.contains('أصدقاء')) {
+                icon = Icons.people;
+              }
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 14),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(16),
-                  leading: const CircleAvatar(
+                  leading: CircleAvatar(
                     radius: 28,
-                    child: Icon(Icons.mic),
+                    child: Icon(icon),
                   ),
                   title: Text(
-                    name,
+                    title,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
                       fontSize: 18,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 6),
+                    padding: const EdgeInsets.only(top: 7),
                     child: Text(
-                      '$description\nالمضيف: $ownerName\n$listeners مستمع',
+                      '🎙️ $speakers متحدث   •   👥 $listeners مستمع',
                     ),
                   ),
-                  isThreeLine: true,
                   trailing: const Icon(
                     Icons.arrow_forward_ios,
                     size: 18,
@@ -661,7 +656,8 @@ class HomePage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (_) => RoomPage(
-                          roomId: rooms[index].id,
+                          roomId: room.id,
+                          title: title,
                         ),
                       ),
                     );
@@ -676,174 +672,16 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// ==================== إنشاء غرفة ====================
-
-class CreateRoomPage extends StatefulWidget {
-  const CreateRoomPage({super.key});
-
-  @override
-  State<CreateRoomPage> createState() => _CreateRoomPageState();
-}
-
-class _CreateRoomPageState extends State<CreateRoomPage> {
-  final nameController = TextEditingController();
-  final descriptionController = TextEditingController();
-
-  bool loading = false;
-
-  Future<void> createRoom() async {
-    final name = nameController.text.trim();
-    final description = descriptionController.text.trim();
-
-    if (name.isEmpty) {
-      showMessage('اكتب اسم الغرفة');
-      return;
-    }
-
-    final user = FirebaseAuth.instance.currentUser;
-
-    if (user == null) {
-      showMessage('يجب تسجيل الدخول أولاً');
-      return;
-    }
-
-    setState(() => loading = true);
-
-    try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      final userData = userDoc.data();
-      final ownerName =
-          userData?['name'] ?? user.email?.split('@').first ?? 'مستخدم Meko';
-
-      await FirebaseFirestore.instance.collection('rooms').add({
-        'name': name,
-        'description': description.isEmpty
-            ? 'غرفة صوتية في Meko'
-            : description,
-        'ownerId': user.uid,
-        'ownerName': ownerName,
-        'listeners': 0,
-        'speakers': 0,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      if (!mounted) return;
-
-      Navigator.pop(context);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم إنشاء الغرفة بنجاح 🎉'),
-        ),
-      );
-    } catch (e) {
-      showMessage(
-        'تعذر إنشاء الغرفة. تأكد من إعداد Firestore.',
-      );
-    } finally {
-      if (mounted) {
-        setState(() => loading = false);
-      }
-    }
-  }
-
-  void showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    descriptionController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('إنشاء غرفة'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
-            const CircleAvatar(
-              radius: 55,
-              child: Icon(
-                Icons.mic,
-                size: 55,
-              ),
-            ),
-            const SizedBox(height: 25),
-            const Text(
-              'أنشئ غرفتك الصوتية',
-              style: TextStyle(
-                fontSize: 27,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 30),
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'اسم الغرفة',
-                hintText: 'مثلاً: غرفة الأصدقاء',
-                prefixIcon: Icon(Icons.meeting_room_outlined),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 18),
-            TextField(
-              controller: descriptionController,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'وصف الغرفة',
-                hintText: 'اكتب وصفاً بسيطاً للغرفة',
-                prefixIcon: Icon(Icons.description_outlined),
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 25),
-            SizedBox(
-              width: double.infinity,
-              height: 55,
-              child: FilledButton(
-                onPressed: loading ? null : createRoom,
-                child: loading
-                    ? const SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: CircularProgressIndicator(),
-                      )
-                    : const Text(
-                        'إنشاء الغرفة',
-                        style: TextStyle(fontSize: 18),
-                      ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ==================== الغرفة ====================
 
 class RoomPage extends StatefulWidget {
   final String roomId;
+  final String title;
 
   const RoomPage({
     super.key,
     required this.roomId,
+    required this.title,
   });
 
   @override
@@ -868,7 +706,9 @@ class _RoomPageState extends State<RoomPage> {
       });
 
       if (mounted) {
-        setState(() => joined = true);
+        setState(() {
+          joined = true;
+        });
       }
     } catch (e) {
       showMessage('تعذر دخول الغرفة');
@@ -882,12 +722,12 @@ class _RoomPageState extends State<RoomPage> {
       await roomRef.update({
         'listeners': FieldValue.increment(-1),
       });
-    } catch (_) {
-      // نتجاهل الخطأ عند المغادرة.
-    }
+    } catch (_) {}
 
     if (mounted) {
-      setState(() => joined = false);
+      setState(() {
+        joined = false;
+      });
     }
   }
 
@@ -932,80 +772,53 @@ class _RoomPageState extends State<RoomPage> {
           );
         }
 
-        final data = snapshot.data!.data()!;
+        final data = snapshot.data!.data() ?? {};
 
-        final name = data['name'] ?? 'غرفة Meko';
-        final description = data['description'] ?? '';
-        final ownerName = data['ownerName'] ?? 'المضيف';
-        final listeners = data['listeners'] ?? 0;
-        final speakers = data['speakers'] ?? 0;
+        final speakers =
+            data['speakers']?.toString() ?? '0';
+
+        final listeners =
+            data['listeners']?.toString() ?? '0';
 
         return Scaffold(
           appBar: AppBar(
-            title: Text(name),
+            title: Text(widget.title),
             centerTitle: true,
           ),
           body: Column(
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  children: [
-                    const CircleAvatar(
-                      radius: 48,
-                      child: Icon(
-                        Icons.mic,
-                        size: 50,
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Text(
-                      name,
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      description,
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'المضيف: $ownerName',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 35),
+              const CircleAvatar(
+                radius: 55,
+                child: Icon(
+                  Icons.mic,
+                  size: 55,
                 ),
               ),
-              const Divider(),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _stat(
-                      Icons.people,
-                      '$listeners',
-                      'مستمع',
-                    ),
-                    _stat(
-                      Icons.record_voice_over,
-                      '$speakers',
-                      'متحدث',
-                    ),
-                  ],
+              const SizedBox(height: 18),
+              Text(
+                widget.title,
+                style: const TextStyle(
+                  fontSize: 27,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _info(
+                    Icons.record_voice_over,
+                    speakers,
+                    'متحدث',
+                  ),
+                  _info(
+                    Icons.people,
+                    listeners,
+                    'مستمع',
+                  ),
+                ],
+              ),
               const Expanded(
                 child: Center(
                   child: Column(
@@ -1013,49 +826,37 @@ class _RoomPageState extends State<RoomPage> {
                     children: [
                       Icon(
                         Icons.headset_mic,
-                        size: 80,
+                        size: 75,
                       ),
                       SizedBox(height: 15),
                       Text(
-                        'الصوت الحقيقي قادم في الخطوة التالية 🎙️',
+                        'الغرفة جاهزة 🎙️',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 21,
                           fontWeight: FontWeight.bold,
                         ),
-                        textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'حالياً نختبر إنشاء الغرف ودخولها.',
+                        'سنضيف الصوت الحقيقي في الخطوة التالية.',
                         textAlign: TextAlign.center,
                       ),
                     ],
                   ),
                 ),
               ),
-              if (joined)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              muted = !muted;
-                            });
-                          },
-                          icon: Icon(
-                            muted ? Icons.mic_off : Icons.mic,
-                          ),
-                          label: Text(
-                            muted ? 'تشغيل الميكروفون' : 'كتم الميكروفون',
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: FilledButton.icon(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  20,
+                  10,
+                  20,
+                  25,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: joined
+                      ? FilledButton.icon(
                           onPressed: () async {
                             await leaveRoom();
 
@@ -1064,28 +865,21 @@ class _RoomPageState extends State<RoomPage> {
                             }
                           },
                           icon: const Icon(Icons.exit_to_app),
-                          label: const Text('مغادرة'),
+                          label: const Text(
+                            'مغادرة الغرفة',
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        )
+                      : FilledButton.icon(
+                          onPressed: joinRoom,
+                          icon: const Icon(Icons.login),
+                          label: const Text(
+                            'دخول الغرفة',
+                            style: TextStyle(fontSize: 18),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: FilledButton.icon(
-                      onPressed: joinRoom,
-                      icon: const Icon(Icons.login),
-                      label: const Text(
-                        'دخول الغرفة',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  ),
                 ),
+              ),
             ],
           ),
         );
@@ -1093,15 +887,15 @@ class _RoomPageState extends State<RoomPage> {
     );
   }
 
-  Widget _stat(
+  Widget _info(
     IconData icon,
     String value,
     String label,
   ) {
     return Column(
       children: [
-        Icon(icon, size: 28),
-        const SizedBox(height: 5),
+        Icon(icon, size: 30),
+        const SizedBox(height: 6),
         Text(
           value,
           style: const TextStyle(
