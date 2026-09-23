@@ -7,23 +7,13 @@ workflows:
       java: 17
 
     scripts:
-      - name: Check Flutter and Android files
-        script: |
-          echo "===== FLUTTER ====="
-          flutter --version
-
-          echo "===== BUILD.GRADLE ====="
-          cat android/build.gradle
-
-          echo "===== SETTINGS.GRADLE ====="
-          cat android/settings.gradle
-
-          echo "===== GRADLE.PROPERTIES ====="
-          cat android/gradle.properties
-
       - name: Get packages
         script: |
           flutter pub get
+
+      - name: Build APK
+        script: |
+          flutter build apk --release
 
     artifacts:
       - build/app/outputs/flutter-apk/app-release.apk
