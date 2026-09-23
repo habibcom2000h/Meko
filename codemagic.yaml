@@ -3,7 +3,7 @@ workflows:
     name: Meko Android
 
     environment:
-      flutter: 3.41.0
+      flutter: 3.43.2
       java: 17
 
     scripts:
