@@ -7,6 +7,17 @@ workflows:
       java: 17
 
     scripts:
+      - name: Check Flutter and Gradle
+        script: |
+          echo "===== FLUTTER VERSION ====="
+          flutter --version
+
+          echo "===== JAVA VERSION ====="
+          java -version
+
+          echo "===== GRADLE FILES ====="
+          find android -maxdepth 3 -type f | sort
+
       - name: Get packages
         script: |
           flutter pub get
